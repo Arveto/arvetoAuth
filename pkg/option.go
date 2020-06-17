@@ -6,6 +6,8 @@ package auth
 
 import (
 	"./db"
+	"crypto/rsa"
+	"github.com/HuguesGuilleus/go-parsersa"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -13,23 +15,33 @@ import (
 
 // The option to create a server
 type Option struct {
-	DB string // path to the DB
+	DB  string // path to the DB
+	Key string // private key file
 }
 
 func Create(opt Option) *Server {
 	if opt.DB == "" {
 		opt.DB = filepath.Join("data", "db")
 	}
+
+	k, err := parsersa.PrivFile(opt.Key)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	serv := &Server{
-		db: db.New(opt.DB),
+		db:  db.New(opt.DB),
+		key: k,
 	}
 
 	// Remove this lines for production
 	// serv.loadDefaultUsers()
+	serv.defaultApp()
 	serv.mux.HandleFunc("/!users", serv.GodUsers)
 	serv.mux.HandleFunc("/!login", serv.GodLogin)
 
 	serv.mux.HandleFunc("/me", serv.getMe)
+	serv.mux.HandleFunc("/auth", serv.authUser)
 
 	return serv
 }
@@ -38,6 +50,7 @@ func Create(opt Option) *Server {
 type Server struct {
 	db  *db.DB
 	mux http.ServeMux
+	key *rsa.PrivateKey
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

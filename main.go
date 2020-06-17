@@ -12,5 +12,7 @@ import (
 
 func main() {
 	log.Println("main()")
-	log.Fatal(http.ListenAndServe(":8000", auth.Create(auth.Option{})))
+	log.Fatal(http.ListenAndServe(":8000", auth.Create(auth.Option{
+		Key: "data/key.pem",
+	})))
 }
