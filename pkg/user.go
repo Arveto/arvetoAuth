@@ -17,6 +17,45 @@ type User struct {
 	// Password string
 }
 
+/* EDIT USER */
+
+func (s *Server) userEditName(w http.ResponseWriter, r *http.Request) {
+	s.usersEdit(w, r, func(u *User, v string) {
+		u.Name = v
+	})
+}
+func (s *Server) userEditEmail(w http.ResponseWriter, r *http.Request) {
+	s.usersEdit(w, r, func(u *User, v string) {
+		u.Email = v
+	})
+}
+func (s *Server) usersEdit(w http.ResponseWriter, r *http.Request, edit func(*User, string)) {
+	if r.Method != "PATCH" {
+		http.Error(w, "Need a PATCH Method", http.StatusBadRequest)
+		return
+	}
+
+	if r.Header.Get("Content-Type") != "text/plain; charset=utf-8" {
+		http.Error(w, "Expected `Content-Type: text/plain; charset=utf-8`",
+			http.StatusUnsupportedMediaType)
+		return
+	}
+
+	data := make([]byte, 100, 100)
+	if n, _ := r.Body.Read(data); n == 0 {
+		http.Error(w, "Expected a body\r\n", http.StatusBadRequest)
+		return
+	} else {
+		data = data[:n]
+	}
+
+	u := s.getUser(r)
+	edit(u, string(data))
+	s.db.SetS("user:"+u.Login, u)
+}
+
+/* GET USER AND USER LEVEL */
+
 // Add a http.HandlerFunc to the server.mux. If a client with a lowest level
 // or without authentification, the request are rejected.
 func (s *Server) handleLevel(pattern string, l public.UserLevel, h http.HandlerFunc) {
@@ -35,16 +74,6 @@ func (s *Server) handleLevel(pattern string, l public.UserLevel, h http.HandlerF
 
 // Send public information about the current user
 func (s *Server) getMe(w http.ResponseWriter, r *http.Request) {
-	// if userOk(w, r) {
-	// 	return
-	// }
-	//
-	// u := User{}
-	// if Users.GetS("user:"+r.URL.Query().Get("u"), &u) {
-	// 	http.NotFound(w, r)
-	// 	return
-	// }
-
 	me := s.getUser(r)
 	if me == nil {
 		http.Error(w, "Who are you?", http.StatusUnauthorized)
@@ -67,7 +96,19 @@ func (s *Server) getUser(r *http.Request) *User {
 	if s.db.GetS("user:"+idCookie.Value, &u) {
 		return nil
 	}
+
+	// TODO: check identity with cookie.
+
 	return &u
+}
+
+func setCookie(w http.ResponseWriter, name, value string) {
+	w.Header().Add("Set-Cookie", (&http.Cookie{
+		Name:     name,
+		Value:    value,
+		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
+	}).String())
 }
 
 /* !!! DEVELOPMENT FUNCTIONS !!! */
@@ -98,13 +139,4 @@ func (s *Server) GodLogin(w http.ResponseWriter, r *http.Request) {
 	setCookie(w, "credit", "pass")
 
 	http.Redirect(w, r, "/me", http.StatusTemporaryRedirect)
-}
-
-func setCookie(w http.ResponseWriter, name, value string) {
-	w.Header().Add("Set-Cookie", (&http.Cookie{
-		Name:     name,
-		Value:    value,
-		Path:     "/",
-		SameSite: http.SameSiteStrictMode,
-	}).String())
 }
