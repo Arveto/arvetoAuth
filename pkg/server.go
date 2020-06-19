@@ -45,6 +45,7 @@ func Create(opt Option) *Server {
 	serv.mux.HandleFunc("/auth", serv.authUser)
 
 	serv.handleLevel("/log/list", public.LevelStd, serv.logList)
+	serv.handleLevel("/log/count", public.LevelStd, serv.logCount)
 
 	serv.handleLevel("/app/list", public.LevelStd, serv.appList)
 	serv.handleLevel("/app/add", public.LevelAdmin, serv.appAdd)

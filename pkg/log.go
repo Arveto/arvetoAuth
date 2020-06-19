@@ -47,6 +47,23 @@ func (s *Server) logList(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
+func (s *Server) logCount(w http.ResponseWriter, r *http.Request) {
+	prefix, err := logGetPrefix(w, r)
+	if err {
+		return
+	}
+
+	n := 0
+	s.db.ForS(prefix, 0, 0, func(string) bool {
+		n++
+		return false
+	}, func(_ string, e Event) {})
+
+	j, _ := json.Marshal(n)
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(j)
+}
+
 // Get the prefix for log list or index operation
 func logGetPrefix(w http.ResponseWriter, r *http.Request) (string, bool) {
 	prefix := "log:"
