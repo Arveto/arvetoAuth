@@ -44,6 +44,7 @@ func Create(opt Option) *Server {
 	serv.mux.HandleFunc("/me", serv.getMe)
 	serv.mux.HandleFunc("/auth", serv.authUser)
 
+	serv.mux.HandleFunc("/user/list", serv.userList)
 	serv.handleLevel("/user/edit/name", public.LevelStd, serv.userEditName)
 	serv.handleLevel("/user/edit/email", public.LevelStd, serv.userEditEmail)
 	serv.handleLevel("/user/edit/level", public.LevelAdmin, serv.userEditLevel)

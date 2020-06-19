@@ -112,6 +112,37 @@ func (s *Server) handleLevel(pattern string, l public.UserLevel, h http.HandlerF
 	})
 }
 
+// List the users. It depend of the user who make the requet.
+func (s *Server) userList(w http.ResponseWriter, r *http.Request) {
+	u := s.getUser(r)
+	if u == nil {
+		http.Error(w, "Need authentification", http.StatusUnauthorized)
+		return
+	}
+
+	var filter func(*User) bool
+	switch u.Level {
+	case public.LevelStd:
+		filter = func(u *User) bool { return u.Level >= public.LevelStd }
+	case public.LevelAdmin:
+		filter = func(*User) bool { return true }
+	default:
+		http.Error(w, "Required a stantard level", http.StatusForbidden)
+		return
+	}
+
+	all := make([]User, 0)
+	s.db.ForS("user:", 0, 0, nil, func(_ string, u *User) {
+		if filter(u) {
+			all = append(all, *u)
+		}
+	})
+
+	w.Header().Add("Content-Type", "application/json")
+	j, _ := json.Marshal(all)
+	w.Write(j)
+}
+
 // Send public information about the current user
 func (s *Server) getMe(w http.ResponseWriter, r *http.Request) {
 	me := s.getUser(r)
