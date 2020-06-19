@@ -46,6 +46,7 @@ func Create(opt Option) *Server {
 
 	serv.handleLevel("/user/edit/name", public.LevelStd, serv.userEditName)
 	serv.handleLevel("/user/edit/email", public.LevelStd, serv.userEditEmail)
+	serv.handleLevel("/user/edit/level", public.LevelAdmin, serv.userEditLevel)
 
 	serv.handleLevel("/log/list", public.LevelStd, serv.logList)
 	serv.handleLevel("/log/count", public.LevelStd, serv.logCount)

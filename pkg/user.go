@@ -7,6 +7,7 @@ package auth
 import (
 	"./public"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -15,6 +16,45 @@ type User struct {
 	public.UserInfo
 	Cookie string
 	// Password string
+}
+
+func (s *Server) userEditLevel(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "PATCH" {
+		http.Error(w, "Need a PATCH Method", http.StatusBadRequest)
+		return
+	}
+
+	if r.Header.Get("Content-Type") != "application/json" {
+		http.Error(w, "Expected `Content-Type: application/json`",
+			http.StatusUnsupportedMediaType)
+		return
+	}
+
+	var to public.UserLevel
+	content, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err := to.UnmarshalJSON(content); err != nil {
+		http.Error(w, "Parsing error: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var u User
+	if s.db.GetS("user:"+r.URL.Query().Get("u"), &u) {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+	admin := s.getUser(r)
+
+	if u.Login == admin.Login {
+		http.Error(w, "You can't edit your own level", http.StatusBadRequest)
+		return
+	}
+
+	s.logAdd(admin, "/user/edit/level", u.Login,
+		u.Level.String()+" --> "+to.String())
+
+	u.Level = to
+	s.db.SetS("user:"+u.Login, &u)
 }
 
 /* EDIT USER */
