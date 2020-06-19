@@ -50,7 +50,8 @@ func Create(opt Option) *Server {
 	serv.handleLevel("/app/list", public.LevelStd, serv.appList)
 	serv.handleLevel("/app/add", public.LevelAdmin, serv.appAdd)
 	serv.handleLevel("/app/rm", public.LevelAdmin, serv.appRm)
-	serv.handleLevel("/app/edit", public.LevelAdmin, serv.appEdit)
+	serv.handleLevel("/app/edit/url", public.LevelAdmin, serv.appEditURL)
+	serv.handleLevel("/app/edit/name", public.LevelAdmin, serv.appEditName)
 
 	return serv
 }

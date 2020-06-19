@@ -16,11 +16,11 @@ type Event struct {
 	Id        string    `json:"id"`
 	Actor     string    `json:"actor"`
 	Operation string    `json:"operation"`
-	Value     string    `json:"value"`
+	Value     []string  `json:"value"`
 	Date      time.Time `json:"date"`
 }
 
-func (s *Server) logAdd(u *User, op, value string) {
+func (s *Server) logAdd(u *User, op string, value ...string) {
 	id := time.Now().Format("log:2006-1-2-05.000000")
 	s.db.SetS(id, &Event{
 		Actor:     u.Login,

@@ -106,4 +106,53 @@ func (s *Server) appRm(w http.ResponseWriter, r *http.Request) {
 	s.logAdd(s.getUser(r), "/app/rm", id)
 }
 
-func (s *Server) appEdit(w http.ResponseWriter, r *http.Request) {}
+func (s *Server) appEditURL(w http.ResponseWriter, r *http.Request) {
+	s.appEdit(w, r, func(app *application, v string) {
+		app.URL = v
+		s.logAdd(s.getUser(r), "/app/edit/url", app.ID, v)
+	})
+}
+
+func (s *Server) appEditName(w http.ResponseWriter, r *http.Request) {
+	s.appEdit(w, r, func(app *application, v string) {
+		app.Name = v
+		s.logAdd(s.getUser(r), "/app/edit/name", app.ID, v)
+	})
+}
+
+// Edit get the app and the data into the body and call the function edit to
+// edit the application.
+func (s *Server) appEdit(w http.ResponseWriter, r *http.Request, edit func(*application, string)) {
+	if r.Method != "PATCH" {
+		http.Error(w, "Need a PATCH Method", http.StatusBadRequest)
+		return
+	}
+
+	id := r.URL.Query().Get("id")
+	k := "app:" + id
+	app := application{}
+	if id == "" {
+		http.Error(w, "Need and `id` in params\r\n", http.StatusBadRequest)
+		return
+	} else if s.db.GetS(k, &app) {
+		http.Error(w, "This app does not exist\r\n", http.StatusNotFound)
+		return
+	}
+
+	if r.Header.Get("Content-Type") != "text/plain; charset=utf-8" {
+		http.Error(w, "Expected `Content-Type: text/plain; charset=utf-8`",
+			http.StatusUnsupportedMediaType)
+		return
+	}
+
+	data := make([]byte, 100, 100)
+	if n, _ := r.Body.Read(data); n == 0 {
+		http.Error(w, "Expected a body\r\n", http.StatusBadRequest)
+		return
+	} else {
+		data = data[:n]
+	}
+	edit(&app, string(data))
+
+	s.db.SetS(k, &app)
+}
