@@ -2,9 +2,7 @@ package auth
 
 import (
 	"./public"
-	"encoding/base64"
 	"net/http"
-	"strings"
 )
 
 type application struct {
@@ -18,7 +16,7 @@ func (s *Server) defaultApp() {
 	s.db.SetS("app:ex", application{
 		ID:   "ex",
 		Name: "Example for the dev",
-		URL:  "http://localhost:9000/",
+		URL:  "http://localhost:9000/login",
 	})
 }
 
@@ -29,14 +27,9 @@ func (s *Server) authUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	toBytes, _ := base64.RawURLEncoding.DecodeString(r.URL.Query().Get("r"))
-	to := string(toBytes)
-	if to == "" {
-		to = app.URL
-	} else if !strings.HasPrefix(app.URL, to) {
-		http.Error(w, "Redirect params and app.URL have not the same begin.",
-			http.StatusBadRequest)
-		return
+	to := app.URL + "?"
+	if r := r.URL.Query().Get("r"); r != "" {
+		to += "r=" + r + "&"
 	}
 
 	if u := s.getUser(r); u != nil {
@@ -50,8 +43,7 @@ func (s *Server) authUser(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		http.Redirect(w, r, to+jwt,
-			http.StatusTemporaryRedirect)
+		http.Redirect(w, r, to+"jwt="+jwt, http.StatusTemporaryRedirect)
 	} else {
 		http.Error(w, "No user (no login dev)", 400)
 	}

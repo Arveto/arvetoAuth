@@ -35,7 +35,7 @@ func Create(opt Option) *Server {
 	}
 
 	// Remove this lines for production
-	// serv.loadDefaultUsers()
+	serv.loadDefaultUsers()
 	serv.defaultApp()
 	serv.mux.HandleFunc("/!users", serv.GodUsers)
 	serv.mux.HandleFunc("/!login", serv.GodLogin)
