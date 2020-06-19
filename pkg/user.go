@@ -59,7 +59,7 @@ func (s *Server) getUser(r *http.Request) *User {
 
 func (s *Server) GodUsers(w http.ResponseWriter, r *http.Request) {
 	list := make([]User, 0)
-	s.db.ForS("user:", func(_ string, u User) {
+	s.db.ForS("user:", 0, 0, nil, func(_ string, u User) {
 		list = append(list, u)
 	})
 

@@ -5,8 +5,8 @@
 package auth
 
 import (
-	"./db"
 	"crypto/rsa"
+	"github.com/HuguesGuilleus/go-db.v1"
 	"github.com/HuguesGuilleus/go-parsersa"
 	"log"
 	"net/http"
