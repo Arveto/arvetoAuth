@@ -13,7 +13,7 @@ func (s *Server) loadDefaultUsers() {
 		{
 			Name:  "Tomas Benedito Bonito",
 			Login: "tomas",
-			Level: public.LevelStd,
+			Level: public.LevelVisitor,
 		},
 		{
 			Name:  "Zeck",

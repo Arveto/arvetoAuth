@@ -5,6 +5,7 @@
 package auth
 
 import (
+	"./public"
 	"crypto/rsa"
 	"github.com/HuguesGuilleus/go-db.v1"
 	"github.com/HuguesGuilleus/go-parsersa"
@@ -42,6 +43,13 @@ func Create(opt Option) *Server {
 
 	serv.mux.HandleFunc("/me", serv.getMe)
 	serv.mux.HandleFunc("/auth", serv.authUser)
+
+	serv.handleLevel("/log/list", public.LevelStd, serv.logList)
+
+	serv.handleLevel("/app/list", public.LevelStd, serv.appList)
+	serv.handleLevel("/app/add", public.LevelAdmin, serv.appAdd)
+	serv.handleLevel("/app/rm", public.LevelAdmin, serv.appRm)
+	serv.handleLevel("/app/edit", public.LevelAdmin, serv.appEdit)
 
 	return serv
 }

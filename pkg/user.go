@@ -17,6 +17,22 @@ type User struct {
 	// Password string
 }
 
+// Add a http.HandlerFunc to the server.mux. If a client with a lowest level
+// or without authentification, the request are rejected.
+func (s *Server) handleLevel(pattern string, l public.UserLevel, h http.HandlerFunc) {
+	errLevel := "Required a highest level (" + l.String() + ")"
+	s.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		if u := s.getUser(r); u == nil {
+			http.Error(w, "Need authentification", http.StatusUnauthorized)
+			return
+		} else if u.Level < l {
+			http.Error(w, errLevel, http.StatusForbidden)
+			return
+		}
+		h(w, r)
+	})
+}
+
 // Send public information about the current user
 func (s *Server) getMe(w http.ResponseWriter, r *http.Request) {
 	// if userOk(w, r) {

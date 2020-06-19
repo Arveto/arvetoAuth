@@ -1,7 +1,12 @@
+// Copyright (c) 2020, Arveto Ink. All rights reserved.
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file.
+
 package auth
 
 import (
 	"./public"
+	"encoding/json"
 	"net/http"
 )
 
@@ -20,6 +25,7 @@ func (s *Server) defaultApp() {
 	})
 }
 
+// Generate a JWT for a specific app.
 func (s *Server) authUser(w http.ResponseWriter, r *http.Request) {
 	var app application
 	if s.db.GetS("app:"+r.URL.Query().Get("app"), &app) {
@@ -48,3 +54,18 @@ func (s *Server) authUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No user (no login dev)", 400)
 	}
 }
+
+// List the applications.
+func (s *Server) appList(w http.ResponseWriter, r *http.Request) {
+	all := make([]application, 0)
+	s.db.ForS("app:", 0, 0, nil, func(_ string, a application) {
+		all = append(all, a)
+	})
+	j, _ := json.Marshal(all)
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(j)
+}
+
+func (s *Server) appAdd(w http.ResponseWriter, r *http.Request)  {}
+func (s *Server) appRm(w http.ResponseWriter, r *http.Request)   {}
+func (s *Server) appEdit(w http.ResponseWriter, r *http.Request) {}
