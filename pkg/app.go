@@ -86,5 +86,24 @@ func (s *Server) appAdd(w http.ResponseWriter, r *http.Request) {
 	s.logAdd(s.getUser(r), "/app/add", id)
 }
 
-func (s *Server) appRm(w http.ResponseWriter, r *http.Request)   {}
+func (s *Server) appRm(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Need a POST Method", http.StatusBadRequest)
+		return
+	}
+
+	id := r.URL.Query().Get("id")
+	k := "app:" + id
+	if id == "" {
+		http.Error(w, "Need and `id` in params\r\n", http.StatusBadRequest)
+		return
+	} else if s.db.UnknownS(k) {
+		http.Error(w, "This app does not exist\r\n", http.StatusNotFound)
+		return
+	}
+
+	s.db.DeleteS(k)
+	s.logAdd(s.getUser(r), "/app/rm", id)
+}
+
 func (s *Server) appEdit(w http.ResponseWriter, r *http.Request) {}
