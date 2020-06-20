@@ -49,9 +49,9 @@ func (s *Server) authUser(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		http.Redirect(w, r, to+"jwt="+jwt, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, to+"jwt="+jwt, http.StatusFound)
 	} else {
-		http.Error(w, "No user (no login dev)", 400)
+		s.loginIn(w, r, app.ID)
 	}
 }
 

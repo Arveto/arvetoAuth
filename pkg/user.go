@@ -192,7 +192,7 @@ func (s *Server) getUser(r *http.Request) *User {
 }
 
 // Create a new cookie for a user
-func (s *Server) setCookie(w http.ResponseWriter, u *User) {
+func (s *Server) setCookie(w http.ResponseWriter, r *http.Request, u *User) {
 	v := make([]byte, 15, 15)
 	rand.Read(v)
 	c := base64.RawStdEncoding.EncodeToString(v)
@@ -206,13 +206,15 @@ func (s *Server) setCookie(w http.ResponseWriter, u *User) {
 		Name:     "credit",
 		Value:    c,
 		Path:     "/",
-		SameSite: http.SameSiteStrictMode,
+		HttpOnly: true,
+		Domain:   r.Host,
 	}).String())
 	w.Header().Add("Set-Cookie", (&http.Cookie{
 		Name:     "id",
 		Value:    u.Login,
 		Path:     "/",
-		SameSite: http.SameSiteStrictMode,
+		HttpOnly: true,
+		Domain:   r.Host,
 	}).String())
 }
 
@@ -238,6 +240,6 @@ func (s *Server) GodLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.setCookie(w, &u)
-	http.Redirect(w, r, "/me", http.StatusTemporaryRedirect)
+	s.setCookie(w, r, &u)
+	http.Redirect(w, r, "/me", http.StatusFound)
 }

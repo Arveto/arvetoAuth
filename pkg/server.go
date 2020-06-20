@@ -16,8 +16,17 @@ import (
 
 // The option to create a server
 type Option struct {
+	URL string // The URL of the server
 	DB  string // path to the DB
 	Key string // private key file
+}
+
+// One server. Use Option to create it.
+type Server struct {
+	db  *db.DB
+	mux http.ServeMux
+	key *rsa.PrivateKey
+	url string
 }
 
 func Create(opt Option) *Server {
@@ -31,6 +40,7 @@ func Create(opt Option) *Server {
 	}
 
 	serv := &Server{
+		url: opt.URL,
 		db:  db.New(opt.DB),
 		key: k,
 	}
@@ -43,6 +53,8 @@ func Create(opt Option) *Server {
 
 	serv.mux.HandleFunc("/me", serv.getMe)
 	serv.mux.HandleFunc("/auth", serv.authUser)
+
+	serv.mux.HandleFunc("/login/github/", serv.loginGithub)
 
 	serv.mux.HandleFunc("/user/list", serv.userList)
 	serv.handleLevel("/user/edit/name", public.LevelStd, serv.userEditName)
@@ -59,13 +71,6 @@ func Create(opt Option) *Server {
 	serv.handleLevel("/app/edit/name", public.LevelAdmin, serv.appEditName)
 
 	return serv
-}
-
-// One server. Use Option to create it.
-type Server struct {
-	db  *db.DB
-	mux http.ServeMux
-	key *rsa.PrivateKey
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

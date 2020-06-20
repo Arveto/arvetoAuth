@@ -65,7 +65,6 @@ func (a *App) Login(destination string, h ErrorHandler) http.HandlerFunc {
 	model := http.Cookie{
 		Name:     a.Cookie,
 		Path:     "/",
-		SameSite: http.SameSiteStrictMode,
 		HttpOnly: true,
 		MaxAge:   24 * 60 * 60,
 	}
@@ -79,13 +78,14 @@ func (a *App) Login(destination string, h ErrorHandler) http.HandlerFunc {
 
 		c := model
 		c.Value = j
+		c.Domain = r.Host
 		w.Header().Add("Set-Cookie", c.String())
 
 		to := destination
 		if s := b64(r.URL.Query().Get("r")); s != "" {
 			to = s
 		}
-		http.Redirect(w, r, to, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, to, http.StatusFound)
 	}
 }
 
@@ -113,6 +113,6 @@ func (a *App) Logout(to string) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Set-Cookie", c)
-		http.Redirect(w, r, to, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, to, http.StatusFound)
 	}
 }
