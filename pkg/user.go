@@ -6,15 +6,18 @@ package auth
 
 import (
 	"./public"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 // All the informations about an user
 type User struct {
 	public.UserInfo
-	Cookie string
+	Cookie map[string]time.Time
 	// Password string
 }
 
@@ -168,15 +171,46 @@ func (s *Server) getUser(r *http.Request) *User {
 		return nil
 	}
 
-	// TODO: check identity with cookie.
+	// Remove old Cookie
+	save := false
+	for k, t := range u.Cookie {
+		if t.Before(time.Now()) {
+			delete(u.Cookie, k)
+			save = true
+		}
+	}
+	if save {
+		s.db.SetS("user:"+idCookie.Value, &u)
+	}
+
+	// The if the actual cookie is set.
+	if u.Cookie[creditCookie.Value].IsZero() {
+		return nil
+	}
 
 	return &u
 }
 
-func setCookie(w http.ResponseWriter, name, value string) {
+// Create a new cookie for a user
+func (s *Server) setCookie(w http.ResponseWriter, u *User) {
+	v := make([]byte, 15, 15)
+	rand.Read(v)
+	c := base64.RawStdEncoding.EncodeToString(v)
+	if u.Cookie == nil {
+		u.Cookie = make(map[string]time.Time, 1)
+	}
+	u.Cookie[c] = time.Now().Add(time.Hour * time.Duration(6))
+	s.db.SetS("user:"+u.Login, u)
+
 	w.Header().Add("Set-Cookie", (&http.Cookie{
-		Name:     name,
-		Value:    value,
+		Name:     "credit",
+		Value:    c,
+		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
+	}).String())
+	w.Header().Add("Set-Cookie", (&http.Cookie{
+		Name:     "id",
+		Value:    u.Login,
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
 	}).String())
@@ -204,10 +238,6 @@ func (s *Server) GodLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u.Cookie = "pass"
-	s.db.SetS("user:"+id, &u)
-	setCookie(w, "id", r.URL.Query().Get("u"))
-	setCookie(w, "credit", "pass")
-
+	s.setCookie(w, &u)
 	http.Redirect(w, r, "/me", http.StatusTemporaryRedirect)
 }
