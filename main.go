@@ -12,21 +12,24 @@ import (
 	"net/http"
 )
 
-// Load github access
-func init() {
+func main() {
+	log.Println("main()")
+
 	config, err := ini.Load("data/config.ini")
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Load github access
 	github.Client = config.Section("github").Key("client").String()
 	github.Secret = config.Section("github").Key("secret").String()
-}
 
-func main() {
-	log.Println("main()")
+	// Launch the server.
 	log.Fatal(http.ListenAndServe(":8000", auth.Create(auth.Option{
-		Key:  "data/key.pem",
-		URL: "http://localhost:8000/",
+		Key:          "data/key.pem",
+		URL:          "http://localhost:8000/",
+		MailHost:     config.Section("mail").Key("host").String(),
+		MailLogin:    config.Section("mail").Key("login").String(),
+		MailPassword: config.Section("mail").Key("password").String(),
 	})))
 }

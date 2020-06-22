@@ -11,6 +11,7 @@ import (
 	"github.com/HuguesGuilleus/go-parsersa"
 	"log"
 	"net/http"
+	"net/smtp"
 	"path/filepath"
 )
 
@@ -19,6 +20,10 @@ type Option struct {
 	URL string // The URL of the server
 	DB  string // path to the DB
 	Key string // private key file
+	// Mail options, need to be processed
+	MailHost     string
+	MailLogin    string
+	MailPassword string
 }
 
 // One server. Use Option to create it.
@@ -27,6 +32,10 @@ type Server struct {
 	mux http.ServeMux
 	key *rsa.PrivateKey
 	url string
+	// Mail options ready to use
+	mailAuth  smtp.Auth
+	mailHost  string
+	mailLogin string
 }
 
 func Create(opt Option) *Server {
@@ -43,6 +52,12 @@ func Create(opt Option) *Server {
 		url: opt.URL,
 		db:  db.New(opt.DB),
 		key: k,
+		mailAuth: smtp.PlainAuth("",
+			opt.MailLogin,
+			opt.MailPassword,
+			opt.MailHost),
+		mailLogin: opt.MailLogin,
+		mailHost:  opt.MailHost + ":smtp",
 	}
 
 	// Remove this lines for production
@@ -69,6 +84,8 @@ func Create(opt Option) *Server {
 	serv.handleLevel("/app/rm", public.LevelAdmin, serv.appRm)
 	serv.handleLevel("/app/edit/url", public.LevelAdmin, serv.appEditURL)
 	serv.handleLevel("/app/edit/name", public.LevelAdmin, serv.appEditName)
+
+	serv.handleLevel("/sendmail", public.LevelAdmin, serv.testMail)
 
 	return serv
 }
