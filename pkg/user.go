@@ -56,6 +56,12 @@ func (s *Server) userEditLevel(w http.ResponseWriter, r *http.Request) {
 	s.logAdd(admin, "/user/edit/level", u.Login,
 		u.Level.String()+" --> "+to.String())
 
+	go s.sendMail(u.Email, "Changement d'accréditation",
+		"Votre niveau d'accréditation à changé:\r\n"+
+			u.Level.String()+" --> "+to.String()+"\r\n\r\n"+
+			"Réalisé par: "+admin.Name+
+			"\r\n\r\n")
+
 	u.Level = to
 	s.db.SetS("user:"+u.Login, &u)
 }

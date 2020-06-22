@@ -46,6 +46,8 @@ func (s *Server) sendMail(to, subject, body string) error {
 		return err
 	}
 
+	log.Printf("[MAIL] <%s> %q\n", to, subject)
+
 	return nil
 }
 
@@ -57,7 +59,7 @@ func encodeBody(m io.Writer, src []byte) {
 	i := 0
 	for ; i+l < len(src); i += l {
 		b.Write(src[i : i+l])
-		b.Write([]byte("\r\n"))
+		m.Write([]byte("\r\n"))
 	}
 	b.Write(src[i:])
 }
