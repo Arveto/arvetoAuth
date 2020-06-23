@@ -9,6 +9,7 @@ import (
 	"crypto/rsa"
 	"github.com/HuguesGuilleus/go-db.v1"
 	"github.com/HuguesGuilleus/go-parsersa"
+	"github.com/HuguesGuilleus/static.v1"
 	"log"
 	"net/http"
 	"net/smtp"
@@ -72,6 +73,20 @@ func Create(opt Option) *Server {
 			}
 		})
 	}()
+
+	serv.mux.Handle("/style.css", static.Css("front/style.css"))
+	serv.mux.Handle("/app.js", static.Js("front/app.js"))
+	index := static.Html("front/index.html")
+	serv.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if u := serv.getUser(r); u == nil {
+			loginInHome(w, r)
+			return
+		} else if u.Level < public.LevelVisitor {
+			http.Error(w, "Accréditation trop faible", http.StatusForbidden)
+			return
+		}
+		index.ServeHTTP(w, r)
+	})
 
 	serv.mux.HandleFunc("/!users", serv.GodUsers)
 	serv.mux.HandleFunc("/!login", serv.GodLogin)

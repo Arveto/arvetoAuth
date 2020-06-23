@@ -7,12 +7,14 @@ package main
 import (
 	"./pkg"
 	"./pkg/github"
+	"github.com/HuguesGuilleus/static.v1"
 	"gopkg.in/ini.v1"
 	"log"
 	"net/http"
 )
 
 func main() {
+	static.Dev = true
 	log.Println("main()")
 
 	config, err := ini.Load("data/config.ini")

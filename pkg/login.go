@@ -13,6 +13,10 @@ import (
 
 var loginApp = regexp.MustCompile(`/login/\w+/(\w+)/(.*)`)
 
+func loginInHome(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, github.URL(""), http.StatusTemporaryRedirect)
+}
+
 func (s *Server) loginIn(w http.ResponseWriter, r *http.Request, app string) {
 	http.Redirect(w, r, github.URL(s.url+"login/github/"+app+"/"+r.URL.Query().Get("r")),
 		http.StatusTemporaryRedirect)
@@ -44,7 +48,12 @@ func (s *Server) loginGithub(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.setCookie(w, r, &u)
-	http.Redirect(w, r,
-		loginApp.ReplaceAllString(r.URL.Path, "/auth?app=$1&r=$2"),
-		http.StatusFound)
+
+	if loginApp.MatchString(r.URL.Path) {
+		http.Redirect(w, r,
+			loginApp.ReplaceAllString(r.URL.Path, "/auth?app=$1&r=$2"),
+			http.StatusFound)
+	} else {
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
 }
