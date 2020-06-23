@@ -45,9 +45,12 @@ func (s *Server) userEditLevel(w http.ResponseWriter, r *http.Request) {
 	if s.db.GetS("user:"+r.URL.Query().Get("u"), &u) {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
+	} else if u.Level == to {
+		http.Error(w, "Same Level", http.StatusBadRequest)
+		return
 	}
-	admin := s.getUser(r)
 
+	admin := s.getUser(r)
 	if u.Login == admin.Login {
 		http.Error(w, "You can't edit your own level", http.StatusBadRequest)
 		return
@@ -55,6 +58,12 @@ func (s *Server) userEditLevel(w http.ResponseWriter, r *http.Request) {
 
 	s.logAdd(admin, "/user/edit/level", u.Login,
 		u.Level.String()+" --> "+to.String())
+
+	if u.Level == public.LevelAdmin {
+		s.nbAdmin--
+	} else if to == public.LevelAdmin {
+		s.nbAdmin++
+	}
 
 	go s.sendMail(u.Email, "Changement d'accréditation",
 		"Votre niveau d'accréditation à changé:\r\n"+

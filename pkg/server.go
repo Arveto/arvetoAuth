@@ -36,6 +36,7 @@ type Server struct {
 	mailAuth  smtp.Auth
 	mailHost  string
 	mailLogin string
+	nbAdmin   int
 }
 
 func Create(opt Option) *Server {
@@ -63,6 +64,15 @@ func Create(opt Option) *Server {
 	// Remove this lines for production
 	serv.loadDefaultUsers()
 	serv.defaultApp()
+
+	go func() {
+		serv.db.ForS("user:", 0, 0, nil, func(_ string, u *User) {
+			if u.Level == public.LevelAdmin {
+				serv.nbAdmin++
+			}
+		})
+	}()
+
 	serv.mux.HandleFunc("/!users", serv.GodUsers)
 	serv.mux.HandleFunc("/!login", serv.GodLogin)
 

@@ -28,16 +28,19 @@ func (s *Server) loginGithub(w http.ResponseWriter, r *http.Request) {
 	id := "github:" + info.Login
 	var u User
 	if s.db.GetS("user:"+id, &u) {
+		defer s.db.SetS("user:"+id, &u)
 		u.Login = id
 		u.Name = info.Pseudo
 		u.Email = info.Email
-		u.Level = public.LevelCandidate
-		s.db.SetS("user:"+id, &u)
 
 		// TODO: get Avatar
 
-		http.Error(w, "Vous êtes inscris! mais vous devez être accrédité pour continuer", http.StatusForbidden)
-		return
+		if s.nbAdmin > 0 {
+			u.Level = public.LevelCandidate
+			http.Error(w, "Vous êtes inscris! mais vous devez être accrédité pour continuer", http.StatusForbidden)
+			return
+		}
+		u.Level = public.LevelAdmin
 	}
 
 	s.setCookie(w, r, &u)
