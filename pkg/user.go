@@ -126,7 +126,25 @@ func (s *Server) userRmMe(w http.ResponseWriter, r *http.Request) {
 	s.Error(w, r, "Supprétion réussi", http.StatusOK)
 }
 
-func (s *Server) userRmOther(w http.ResponseWriter, r *http.Request) {}
+// An administrator remove an other user.
+func (s *Server) userRmOther(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("u")
+	if id == "" {
+		s.Error(w, r, "Need an user (?u=userID) in params", http.StatusBadRequest)
+		return
+	}
+	id = "user:" + id
+
+	var u User
+	if s.db.GetS(id, &u) {
+		s.Error(w, r, "User not Found", http.StatusNotFound)
+		return
+	}
+
+	s.logAdd(s.getUser(r), "/user/rm/other", u.ID)
+	s.db.DeleteS(id)
+	s.Error(w, r, "User deleted", http.StatusOK)
+}
 
 /* GET USER AND USER LEVEL */
 
