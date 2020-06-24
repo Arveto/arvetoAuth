@@ -40,8 +40,14 @@ namespace App {
 		Edit.text(app.Name, 'Nom', `/app/edit/name?id=${app.ID}`);
 		Edit.text(app.URL, 'URL', `/app/edit/url?id=${app.ID}`);
 	}
-	async function rm(app: App) { }
-
+	// Supprimer l'application
+	async function rm(app: App) {
+		Deskop.edit(`Supprétion de l'application&nbsp;: «&#8239;${app.Name}&#8239;»`, list);
+		Edit.confirm(app.ID, async () => {
+			await fetch(`/app/rm?id=${app.ID}`, { method: 'POST' });
+			list();
+		});
+	}
 	// Affiche un écran pour éditer l'application
 	export function create() {
 		Deskop.edit(`Création d'une application`, list);

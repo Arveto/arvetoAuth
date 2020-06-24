@@ -20,6 +20,24 @@ namespace Edit {
 			end(g.querySelector('input').value);
 		});
 	}
+	// Create a text confirm. When done, execute the callBack.
+	export function confirm(v: string, end: () => void) {
+		let g = $(`<div class="input-group input-group-lg mb-3">
+			<div class="input-group-prepend">
+				<span class="input-group-text">Recopier&nbsp;: </span>
+			</div>
+			<input type=text required class="form-control">
+			<div class="input-group-append">
+				<button type=submit class="btn btn-success" disabled>Confirmer</button>
+			</div>
+		</div>`);
+		document.getElementById('edit').append(g);
+		let input = g.querySelector('input');
+		let go = g.querySelector('button');
+		input.placeholder = v;
+		input.addEventListener('input', () => go.disabled = input.value !== v);
+		go.addEventListener('click', end);
+	}
 	// Add and text input.
 	export function text(value: string, name: string, to: string) {
 		let g = $(`<div class="input-group input-group-lg mb-3">
