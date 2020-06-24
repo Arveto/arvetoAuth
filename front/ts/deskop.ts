@@ -42,7 +42,12 @@ namespace Deskop {
 			.forEach(e => e.hidden = true);
 	}
 	// Display an error
-	export function error(m: string) { }
+	export function error(m: string) {
+		if (!m) { return; }
+		let e = $(`<div class="container-sm alert alert-dismissible alert-danger"><button type=button class="close" data-dismiss="alert">&times;</button>${m}</div>`);
+		e.querySelector('button.close').addEventListener('click', () => e.remove());
+		document.querySelector('nav').insertAdjacentElement('afterend', e);
+	}
 }
 
 document.addEventListener("DOMContentLoaded", () => {
