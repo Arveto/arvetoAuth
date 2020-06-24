@@ -35,14 +35,10 @@ namespace App {
 			listGroup.append(e);
 		}
 	}
-	export async function edit(app: App) { }
+	function edit(app: App) {
+		Deskop.edit(`ID&nbsp;: ${app.ID}`, list);
+		Edit.text(app.Name, 'Nom', `/app/edit/name?id=${app.ID}`);
+		Edit.text(app.URL, 'URL', `/app/edit/url?id=${app.ID}`);
+	}
 	async function rm(app: App) { }
-}
-
-function $(html: string): Element {
-	let div = document.createElement('div');
-	div.innerHTML = html;
-	let e = div.firstElementChild;
-	div.remove();
-	return e;
 }
