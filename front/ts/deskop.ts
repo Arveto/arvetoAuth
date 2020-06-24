@@ -20,8 +20,18 @@ namespace Deskop {
 		end.addEventListener('click', endCB);
 		editGroup.append(end);
 	}
+	// Clear all groups, display table with the headers and return <tbody>.
+	export function table(head: string[]): HTMLTableSectionElement {
+		reset();
+		let t = document.getElementById('table');
+		t.hidden = false;
+		t.insertAdjacentHTML('beforeend', '<thead><tr>' +
+			head.map(h => `<th scope="col">${h}</th>`).join('') +
+			'</tr></thead><tbody></tbody>');
+		return t.querySelector('tbody');
+	}
 	function reset() {
-		const groups = ['list', 'edit'];
+		const groups = ['list', 'edit', 'table'];
 
 		groups
 			.map(g => `#${g}>*`)
@@ -36,7 +46,8 @@ namespace Deskop {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-	document.getElementById('appGo').addEventListener('click', App.list, false);
+	document.getElementById('appGo').addEventListener('click', App.list);
+	document.getElementById('logGo').addEventListener('click', Log.list);
 }, { once: true, });
 
 // Create an element and return it.
