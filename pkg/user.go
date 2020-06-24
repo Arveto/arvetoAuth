@@ -51,12 +51,12 @@ func (s *Server) userEditLevel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	admin := s.getUser(r)
-	if u.Login == admin.Login {
+	if u.ID == admin.ID {
 		http.Error(w, "You can't edit your own level", http.StatusBadRequest)
 		return
 	}
 
-	s.logAdd(admin, "/user/edit/level", u.Login,
+	s.logAdd(admin, "/user/edit/level", u.ID,
 		u.Level.String()+" --> "+to.String())
 
 	if u.Level == public.LevelAdmin {
@@ -68,18 +68,18 @@ func (s *Server) userEditLevel(w http.ResponseWriter, r *http.Request) {
 	go s.sendMail(u.Email, "Changement d'accréditation",
 		"Votre niveau d'accréditation à changé:\r\n"+
 			u.Level.String()+" --> "+to.String()+"\r\n\r\n"+
-			"Réalisé par: "+admin.Name+
+			"Réalisé par: "+admin.Pseudo+
 			"\r\n\r\n")
 
 	u.Level = to
-	s.db.SetS("user:"+u.Login, &u)
+	s.db.SetS("user:"+u.ID, &u)
 }
 
 /* EDIT USER */
 
-func (s *Server) userEditName(w http.ResponseWriter, r *http.Request) {
+func (s *Server) userEditPseudo(w http.ResponseWriter, r *http.Request) {
 	s.usersEdit(w, r, func(u *User, v string) {
-		u.Name = v
+		u.Pseudo = v
 	})
 }
 func (s *Server) userEditEmail(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +109,7 @@ func (s *Server) usersEdit(w http.ResponseWriter, r *http.Request, edit func(*Us
 
 	u := s.getUser(r)
 	edit(u, string(data))
-	s.db.SetS("user:"+u.Login, u)
+	s.db.SetS("user:"+u.ID, u)
 }
 
 /* GET USER AND USER LEVEL */
@@ -215,7 +215,7 @@ func (s *Server) setCookie(w http.ResponseWriter, r *http.Request, u *User) {
 		u.Cookie = make(map[string]time.Time, 1)
 	}
 	u.Cookie[c] = time.Now().Add(time.Hour * time.Duration(6))
-	s.db.SetS("user:"+u.Login, u)
+	s.db.SetS("user:"+u.ID, u)
 
 	w.Header().Add("Set-Cookie", (&http.Cookie{
 		Name:     "credit",
@@ -226,7 +226,7 @@ func (s *Server) setCookie(w http.ResponseWriter, r *http.Request, u *User) {
 	}).String())
 	w.Header().Add("Set-Cookie", (&http.Cookie{
 		Name:     "id",
-		Value:    u.Login,
+		Value:    u.ID,
 		Path:     "/",
 		HttpOnly: true,
 		Domain:   r.Host,

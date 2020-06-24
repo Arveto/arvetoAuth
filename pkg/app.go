@@ -66,6 +66,7 @@ func (s *Server) appList(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
+// Create a new application.
 func (s *Server) appAdd(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Need a POST Method", http.StatusBadRequest)
@@ -86,6 +87,7 @@ func (s *Server) appAdd(w http.ResponseWriter, r *http.Request) {
 	s.logAdd(s.getUser(r), "/app/add", id)
 }
 
+// Remove an application
 func (s *Server) appRm(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Need a POST Method", http.StatusBadRequest)
@@ -106,6 +108,7 @@ func (s *Server) appRm(w http.ResponseWriter, r *http.Request) {
 	s.logAdd(s.getUser(r), "/app/rm", id)
 }
 
+// Change the URL of an application.
 func (s *Server) appEditURL(w http.ResponseWriter, r *http.Request) {
 	s.appEdit(w, r, func(app *application, v string) {
 		app.URL = v
@@ -113,6 +116,7 @@ func (s *Server) appEditURL(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Change the name of the application.
 func (s *Server) appEditName(w http.ResponseWriter, r *http.Request) {
 	s.appEdit(w, r, func(app *application, v string) {
 		app.Name = v
@@ -120,8 +124,8 @@ func (s *Server) appEditName(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// Edit get the app and the data into the body and call the function edit to
-// edit the application.
+// appEdit get the app and the data from the body and call the function edit
+// to edit the application.
 func (s *Server) appEdit(w http.ResponseWriter, r *http.Request, edit func(*application, string)) {
 	if r.Method != "PATCH" {
 		http.Error(w, "Need a PATCH Method", http.StatusBadRequest)

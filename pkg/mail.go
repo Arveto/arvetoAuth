@@ -14,6 +14,7 @@ import (
 	"net/smtp"
 )
 
+// Send a mail to test the config.
 func (s *Server) testMail(w http.ResponseWriter, r *http.Request) {
 	to := r.URL.Query().Get("to")
 	if to == "" {
@@ -21,7 +22,7 @@ func (s *Server) testMail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.sendMail(to, "Test Mail", "A mail to test config"); err != nil {
+	if err := s.sendMail(to, "Test Mail", "A mail to test the config"); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -29,6 +30,7 @@ func (s *Server) testMail(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Send mail success!"))
 }
 
+// Send a mail.
 func (s *Server) sendMail(to, subject, body string) error {
 	// Header
 	buff := bytes.NewBufferString("Content-Transfer-Encoding: base64\r\n" +

@@ -97,7 +97,7 @@ func Create(opt Option) *Server {
 	serv.mux.HandleFunc("/login/github/", serv.loginGithub)
 
 	serv.mux.HandleFunc("/user/list", serv.userList)
-	serv.handleLevel("/user/edit/name", public.LevelStd, serv.userEditName)
+	serv.handleLevel("/user/edit/pseudo", public.LevelStd, serv.userEditPseudo)
 	serv.handleLevel("/user/edit/email", public.LevelStd, serv.userEditEmail)
 	serv.handleLevel("/user/edit/level", public.LevelAdmin, serv.userEditLevel)
 

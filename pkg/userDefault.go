@@ -11,29 +11,29 @@ import (
 func (s *Server) loadDefaultUsers() {
 	list := [...]public.UserInfo{
 		{
-			Name:  "Tomas Benedito Bonito",
-			Login: "tomas",
-			Level: public.LevelVisitor,
+			Pseudo: "Tomas Benedito Bonito",
+			ID:     "tomas",
+			Level:  public.LevelVisitor,
 		},
 		{
-			Name:  "Zeck",
-			Login: "zeck",
-			Level: public.LevelStd,
+			Pseudo: "Zeck",
+			ID:     "zeck",
+			Level:  public.LevelStd,
 		},
 		{
-			Name:  "Yuan Shikaï",
-			Login: "yuan",
-			Level: public.LevelStd,
+			Pseudo: "Yuan Shikaï",
+			ID:     "yuan",
+			Level:  public.LevelStd,
 		},
 		{
-			Name:  "Tzu Shikaï",
-			Login: "tzu",
-			Level: public.LevelAdmin,
+			Pseudo: "Tzu Shikaï",
+			ID:     "tzu",
+			Level:  public.LevelAdmin,
 		},
 	}
 	for _, u := range list {
-		u.Email = u.Login + "@fai.mil"
-		s.db.SetS("user:"+u.Login, User{
+		u.Email = u.ID + "@fai.mil"
+		s.db.SetS("user:"+u.ID, User{
 			UserInfo: u,
 		})
 	}

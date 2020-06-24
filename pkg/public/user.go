@@ -18,8 +18,8 @@ import (
 
 // Public informations, send to web page.
 type UserInfo struct {
-	Login  string    `json:"login"`
-	Name   string    `json:"pseudo"`
+	ID     string    `json:"id"`
+	Pseudo string    `json:"pseudo"`
 	Email  string    `json:"email"`
 	Avatar string    `json:"avatar"`
 	Level  UserLevel `json:"level"`
@@ -40,6 +40,7 @@ const (
 	day = 24 * time.Hour
 )
 
+// ToJWT create a JWT and sign it with pub for a specific audience.
 func (u *UserInfo) ToJWT(priv *rsa.PrivateKey, audience string) (string, error) {
 	j, err := json.Marshal(jwtBody{
 		UserInfo:       *u,
@@ -73,6 +74,7 @@ var (
 	JWTEmpty         = errors.New("JWT is empty")
 )
 
+// Verify the JWT and parse the JWT.
 func FromJWT(j string, pub *rsa.PublicKey, audience string) (*UserInfo, error) {
 	if j == "" {
 		return nil, JWTEmpty

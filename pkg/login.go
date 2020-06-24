@@ -13,15 +13,20 @@ import (
 
 var loginApp = regexp.MustCompile(`/login/\w+/(\w+)/(.*)`)
 
+// Redirect to an authentification service.
 func loginInHome(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, github.URL(""), http.StatusTemporaryRedirect)
 }
 
+// Redirect to a specific service and prepare the redirection to
+// an specific application.
 func (s *Server) loginIn(w http.ResponseWriter, r *http.Request, app string) {
-	http.Redirect(w, r, github.URL(s.url+"login/github/"+app+"/"+r.URL.Query().Get("r")),
+	http.Redirect(w, r,
+		github.URL(s.url+"login/github/"+app+"/"+r.URL.Query().Get("r")),
 		http.StatusTemporaryRedirect)
 }
 
+// Manage user from GitHub authentification service.
 func (s *Server) loginGithub(w http.ResponseWriter, r *http.Request) {
 	info, err := github.NewInfo(r)
 	if err != nil {
@@ -33,8 +38,8 @@ func (s *Server) loginGithub(w http.ResponseWriter, r *http.Request) {
 	var u User
 	if s.db.GetS("user:"+id, &u) {
 		defer s.db.SetS("user:"+id, &u)
-		u.Login = id
-		u.Name = info.Pseudo
+		u.ID = id
+		u.Pseudo = info.Pseudo
 		u.Email = info.Email
 
 		// TODO: get Avatar

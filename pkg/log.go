@@ -20,10 +20,11 @@ type Event struct {
 	Date      time.Time `json:"date"`
 }
 
+// Add new event.
 func (s *Server) logAdd(u *User, op string, value ...string) {
 	id := time.Now().Format("log:2006-1-2-05.000000")
 	s.db.SetS(id, &Event{
-		Actor:     u.Login,
+		Actor:     u.ID,
 		Operation: op,
 		Value:     value,
 		Id:        id,
@@ -31,6 +32,7 @@ func (s *Server) logAdd(u *User, op string, value ...string) {
 	})
 }
 
+// List the element for a specific period.
 func (s *Server) logList(w http.ResponseWriter, r *http.Request) {
 	prefix, err := logGetPrefix(w, r)
 	if err {
@@ -47,6 +49,7 @@ func (s *Server) logList(w http.ResponseWriter, r *http.Request) {
 	w.Write(j)
 }
 
+// Send the number of element for a specifica period.
 func (s *Server) logCount(w http.ResponseWriter, r *http.Request) {
 	prefix, err := logGetPrefix(w, r)
 	if err {
