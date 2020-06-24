@@ -112,6 +112,22 @@ func (s *Server) usersEdit(w http.ResponseWriter, r *http.Request, edit func(*Us
 	s.db.SetS("user:"+u.ID, u)
 }
 
+// The user remove itself.
+func (s *Server) userRmMe(w http.ResponseWriter, r *http.Request) {
+	u := s.getUser(r)
+	if u == nil {
+		s.Error(w, r, "Vous n'êtes pas identifié", http.StatusUnauthorized)
+		return
+	}
+
+	s.logAdd(u, "/user/rm/me")
+	s.db.DeleteS("user:" + u.ID)
+
+	s.Error(w, r, "Supprétion réussi", http.StatusOK)
+}
+
+func (s *Server) userRmOther(w http.ResponseWriter, r *http.Request) {}
+
 /* GET USER AND USER LEVEL */
 
 // Add a http.HandlerFunc to the server.mux. If a client with a lowest level

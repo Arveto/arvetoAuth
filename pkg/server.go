@@ -114,6 +114,8 @@ func Create(opt Option) *Server {
 	serv.handleLevel("/user/edit/pseudo", public.LevelStd, serv.userEditPseudo)
 	serv.handleLevel("/user/edit/email", public.LevelStd, serv.userEditEmail)
 	serv.handleLevel("/user/edit/level", public.LevelAdmin, serv.userEditLevel)
+	serv.mux.HandleFunc("/user/rm/me", serv.userRmMe)
+	serv.handleLevel("/user/rm/other", public.LevelAdmin, serv.userRmOther)
 
 	serv.handleLevel("/log/list", public.LevelStd, serv.logList)
 	serv.handleLevel("/log/count", public.LevelStd, serv.logCount)
