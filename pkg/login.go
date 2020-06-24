@@ -62,3 +62,14 @@ func (s *Server) loginGithub(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
+
+func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
+	u := s.getUser(r)
+	if u == nil {
+		s.Error(w, r, "Vous n'êtes pas identifié.", http.StatusBadRequest)
+		return
+	}
+	c, _ := r.Cookie("credit")
+	delete(u.Cookie, c.Value)
+	s.db.SetS("user:"+u.ID, u)
+}

@@ -105,6 +105,7 @@ func Create(opt Option) *Server {
 
 	serv.mux.HandleFunc("/me", serv.getMe)
 	serv.mux.HandleFunc("/auth", serv.authUser)
+	serv.mux.HandleFunc("/logout", serv.logout)
 
 	serv.mux.HandleFunc("/login/", loginInHome)
 	serv.mux.HandleFunc("/login/github/", serv.loginGithub)
