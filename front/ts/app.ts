@@ -41,4 +41,17 @@ namespace App {
 		Edit.text(app.URL, 'URL', `/app/edit/url?id=${app.ID}`);
 	}
 	async function rm(app: App) { }
+
+	// Affiche un écran pour éditer l'application
+	export function create() {
+		Deskop.edit(`Création d'une application`, list);
+		Edit.create('ID', async id => {
+			await fetch(`/app/add?id=${id}`, { method: 'POST' });
+			edit({
+				ID: id,
+				Name: '',
+				URL: '',
+			});
+		});
+	}
 }
