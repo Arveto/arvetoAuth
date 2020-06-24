@@ -223,6 +223,7 @@ func (s *Server) setCookie(w http.ResponseWriter, r *http.Request, u *User) {
 		Path:     "/",
 		HttpOnly: true,
 		Domain:   r.Host,
+		SameSite: http.SameSiteStrictMode,
 	}).String())
 	w.Header().Add("Set-Cookie", (&http.Cookie{
 		Name:     "id",
@@ -230,6 +231,7 @@ func (s *Server) setCookie(w http.ResponseWriter, r *http.Request, u *User) {
 		Path:     "/",
 		HttpOnly: true,
 		Domain:   r.Host,
+		SameSite: http.SameSiteStrictMode,
 	}).String())
 }
 

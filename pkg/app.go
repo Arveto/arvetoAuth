@@ -49,7 +49,7 @@ func (s *Server) authUser(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		http.Redirect(w, r, to+"jwt="+jwt, http.StatusFound)
+		redirection(w, to+"jwt="+jwt)
 	} else {
 		s.loginIn(w, r, app.ID)
 	}

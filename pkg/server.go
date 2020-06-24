@@ -126,6 +126,10 @@ func Create(opt Option) *Server {
 
 	serv.handleLevel("/sendmail", public.LevelAdmin, serv.testMail)
 
+	serv.mux.HandleFunc("/r", func(w http.ResponseWriter, _ *http.Request) {
+		redirection(w, "/")
+	})
+
 	return serv
 }
 
@@ -133,4 +137,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Println("[REQ]", r.URL.Path)
 	w.Header().Add("Server", "Arveto auth server")
 	s.mux.ServeHTTP(w, r)
+}
+
+// Send JavaScrip to make redirection with cookie.
+func redirection(w http.ResponseWriter, to string) {
+	w.Header().Add("Content-Type", "text/html; charset=utf-8")
+	w.Write([]byte(`<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><a href="` + to + `">Redirect</a><script>document.location.replace('` + to + `');</script></body></html>`))
 }

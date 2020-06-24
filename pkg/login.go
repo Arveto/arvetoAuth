@@ -55,11 +55,9 @@ func (s *Server) loginGithub(w http.ResponseWriter, r *http.Request) {
 	s.setCookie(w, r, &u)
 
 	if loginApp.MatchString(r.URL.Path) {
-		http.Redirect(w, r,
-			loginApp.ReplaceAllString(r.URL.Path, "/auth?app=$1&r=$2"),
-			http.StatusFound)
+		redirection(w, loginApp.ReplaceAllString(r.URL.Path, "/auth?app=$1&r=$2"))
 	} else {
-		http.Redirect(w, r, "/", http.StatusFound)
+		redirection(w, "/")
 	}
 }
 
@@ -72,4 +70,6 @@ func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 	c, _ := r.Cookie("credit")
 	delete(u.Cookie, c.Value)
 	s.db.SetS("user:"+u.ID, u)
+
+	redirection(w, "/")
 }
