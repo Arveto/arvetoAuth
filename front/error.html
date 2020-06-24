@@ -16,8 +16,10 @@
 						alt="Logo d'Arveto">
 			</div>
 			<div class="col-8">
-				<h1 class="display-3">Error&nbsp;:
-					{{html .Code}}</h1>
+				<h1 class="display-3">
+					{{- if eq .Code 200 }}Success
+					{{else}}Error{{end}}&nbsp;:
+						{{html .Code}}</h1>
 				<a href="">{{html .URL}}</a>
 				<hr class="border">
 				<p class="text-monospace my-3">{{html .Error}}</p>
