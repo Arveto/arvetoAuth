@@ -13,11 +13,11 @@ var (
 	loginURL = ""
 )
 
-// Donne l'addresse où rediriger les utilisateurs pour s'identifier.
+// Return and URL to come to GitHub signing page.
 func URL(redirect string) string {
 	if loginURL == "" && Client != "" {
 		loginURL = "https://github.com/login/oauth/authorize?" +
-			"scope=read%3Auser,user%3Aemail" +
+			"scope=user%3Aemail" +
 			"&client_id=" + Client
 	}
 
