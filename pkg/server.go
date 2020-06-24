@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/smtp"
 	"path/filepath"
+	"text/template"
 )
 
 // The option to create a server
@@ -33,6 +34,8 @@ type Server struct {
 	mux http.ServeMux
 	key *rsa.PrivateKey
 	url string
+	// The template to send error response.
+	errorPage *template.Template
 	// Mail options ready to use
 	mailAuth  smtp.Auth
 	mailHost  string
@@ -60,6 +63,7 @@ func Create(opt Option) *Server {
 			opt.MailHost),
 		mailLogin: opt.MailLogin,
 		mailHost:  opt.MailHost + ":smtp",
+		errorPage: static.Templ("front/error.html"),
 	}
 
 	// Remove this lines for production
@@ -81,11 +85,16 @@ func Create(opt Option) *Server {
 	index := static.Html("front/index.html")
 	pub := static.Html("front/public.html")
 	serv.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			serv.Error(w, r, "Not Found", 404)
+			return
+		}
+
 		if u := serv.getUser(r); u == nil {
 			pub.ServeHTTP(w, r)
 			return
 		} else if u.Level < public.LevelVisitor {
-			http.Error(w, "Accréditation trop faible", http.StatusForbidden)
+			serv.Error(w, r, "Accréditation trop faible", http.StatusForbidden)
 			return
 		}
 		index.ServeHTTP(w, r)

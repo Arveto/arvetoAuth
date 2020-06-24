@@ -30,7 +30,7 @@ func (s *Server) loginIn(w http.ResponseWriter, r *http.Request, app string) {
 func (s *Server) loginGithub(w http.ResponseWriter, r *http.Request) {
 	info, err := github.NewInfo(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.Error(w, r, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -46,7 +46,7 @@ func (s *Server) loginGithub(w http.ResponseWriter, r *http.Request) {
 
 		if s.nbAdmin > 0 {
 			u.Level = public.LevelCandidate
-			http.Error(w, "Vous êtes inscris! mais vous devez être accrédité pour continuer", http.StatusForbidden)
+			s.Error(w, r, "Vous êtes inscris! mais vous devez être accrédité pour continuer", http.StatusForbidden)
 			return
 		}
 		u.Level = public.LevelAdmin

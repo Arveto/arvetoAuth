@@ -18,12 +18,12 @@ import (
 func (s *Server) testMail(w http.ResponseWriter, r *http.Request) {
 	to := r.URL.Query().Get("to")
 	if to == "" {
-		http.Error(w, "Give to in URL params", http.StatusBadRequest)
+		s.Error(w, r, "Give to in URL params", http.StatusBadRequest)
 		return
 	}
 
 	if err := s.sendMail(to, "Test Mail", "A mail to test the config"); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.Error(w, r, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

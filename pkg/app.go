@@ -29,7 +29,7 @@ func (s *Server) defaultApp() {
 func (s *Server) authUser(w http.ResponseWriter, r *http.Request) {
 	var app application
 	if s.db.GetS("app:"+r.URL.Query().Get("app"), &app) {
-		http.Error(w, "Need app params in URL", http.StatusBadRequest)
+		s.Error(w, r, "Need app params in URL", http.StatusBadRequest)
 		return
 	}
 
@@ -40,12 +40,12 @@ func (s *Server) authUser(w http.ResponseWriter, r *http.Request) {
 
 	if u := s.getUser(r); u != nil {
 		if u.Level < public.LevelVisitor {
-			http.Error(w, "Lowest level", http.StatusForbidden)
+			s.Error(w, r, "Lowest level", http.StatusForbidden)
 			return
 		}
 		jwt, err := u.ToJWT(s.key, app.ID)
 		if err != nil {
-			http.Error(w, "Generate JWT error: "+err.Error(),
+			s.Error(w, r, "Generate JWT error: "+err.Error(),
 				http.StatusInternalServerError)
 			return
 		}
@@ -69,17 +69,17 @@ func (s *Server) appList(w http.ResponseWriter, r *http.Request) {
 // Create a new application.
 func (s *Server) appAdd(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Error(w, "Need a POST Method", http.StatusBadRequest)
+		s.Error(w, r, "Need a POST Method", http.StatusBadRequest)
 		return
 	}
 
 	id := r.URL.Query().Get("id")
 	k := "app:" + id
 	if id == "" {
-		http.Error(w, "Need and `id` in params\r\n", http.StatusBadRequest)
+		s.Error(w, r, "Need and `id` in params\r\n", http.StatusBadRequest)
 		return
 	} else if !s.db.UnknownS(k) {
-		http.Error(w, "This app already exist\r\n", http.StatusConflict)
+		s.Error(w, r, "This app already exist\r\n", http.StatusConflict)
 		return
 	}
 
@@ -90,17 +90,17 @@ func (s *Server) appAdd(w http.ResponseWriter, r *http.Request) {
 // Remove an application
 func (s *Server) appRm(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		http.Error(w, "Need a POST Method", http.StatusBadRequest)
+		s.Error(w, r, "Need a POST Method", http.StatusBadRequest)
 		return
 	}
 
 	id := r.URL.Query().Get("id")
 	k := "app:" + id
 	if id == "" {
-		http.Error(w, "Need and `id` in params\r\n", http.StatusBadRequest)
+		s.Error(w, r, "Need and `id` in params\r\n", http.StatusBadRequest)
 		return
 	} else if s.db.UnknownS(k) {
-		http.Error(w, "This app does not exist\r\n", http.StatusNotFound)
+		s.Error(w, r, "This app does not exist\r\n", http.StatusNotFound)
 		return
 	}
 
@@ -128,7 +128,7 @@ func (s *Server) appEditName(w http.ResponseWriter, r *http.Request) {
 // to edit the application.
 func (s *Server) appEdit(w http.ResponseWriter, r *http.Request, edit func(*application, string)) {
 	if r.Method != "PATCH" {
-		http.Error(w, "Need a PATCH Method", http.StatusBadRequest)
+		s.Error(w, r, "Need a PATCH Method", http.StatusBadRequest)
 		return
 	}
 
@@ -136,22 +136,22 @@ func (s *Server) appEdit(w http.ResponseWriter, r *http.Request, edit func(*appl
 	k := "app:" + id
 	app := application{}
 	if id == "" {
-		http.Error(w, "Need and `id` in params\r\n", http.StatusBadRequest)
+		s.Error(w, r, "Need and `id` in params\r\n", http.StatusBadRequest)
 		return
 	} else if s.db.GetS(k, &app) {
-		http.Error(w, "This app does not exist\r\n", http.StatusNotFound)
+		s.Error(w, r, "This app does not exist\r\n", http.StatusNotFound)
 		return
 	}
 
 	if r.Header.Get("Content-Type") != "text/plain; charset=utf-8" {
-		http.Error(w, "Expected `Content-Type: text/plain; charset=utf-8`",
+		s.Error(w, r, "Expected `Content-Type: text/plain; charset=utf-8`",
 			http.StatusUnsupportedMediaType)
 		return
 	}
 
 	data := make([]byte, 100, 100)
 	if n, _ := r.Body.Read(data); n == 0 {
-		http.Error(w, "Expected a body\r\n", http.StatusBadRequest)
+		s.Error(w, r, "Expected a body\r\n", http.StatusBadRequest)
 		return
 	} else {
 		data = data[:n]

@@ -23,12 +23,12 @@ type User struct {
 
 func (s *Server) userEditLevel(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "PATCH" {
-		http.Error(w, "Need a PATCH Method", http.StatusBadRequest)
+		s.Error(w, r, "Need a PATCH Method", http.StatusBadRequest)
 		return
 	}
 
 	if r.Header.Get("Content-Type") != "application/json" {
-		http.Error(w, "Expected `Content-Type: application/json`",
+		s.Error(w, r, "Expected `Content-Type: application/json`",
 			http.StatusUnsupportedMediaType)
 		return
 	}
@@ -37,22 +37,22 @@ func (s *Server) userEditLevel(w http.ResponseWriter, r *http.Request) {
 	content, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err := to.UnmarshalJSON(content); err != nil {
-		http.Error(w, "Parsing error: "+err.Error(), http.StatusBadRequest)
+		s.Error(w, r, "Parsing error: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	var u User
 	if s.db.GetS("user:"+r.URL.Query().Get("u"), &u) {
-		http.Error(w, "User not found", http.StatusNotFound)
+		s.Error(w, r, "User not found", http.StatusNotFound)
 		return
 	} else if u.Level == to {
-		http.Error(w, "Same Level", http.StatusBadRequest)
+		s.Error(w, r, "Same Level", http.StatusBadRequest)
 		return
 	}
 
 	admin := s.getUser(r)
 	if u.ID == admin.ID {
-		http.Error(w, "You can't edit your own level", http.StatusBadRequest)
+		s.Error(w, r, "You can't edit your own level", http.StatusBadRequest)
 		return
 	}
 
@@ -89,19 +89,19 @@ func (s *Server) userEditEmail(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) usersEdit(w http.ResponseWriter, r *http.Request, edit func(*User, string)) {
 	if r.Method != "PATCH" {
-		http.Error(w, "Need a PATCH Method", http.StatusBadRequest)
+		s.Error(w, r, "Need a PATCH Method", http.StatusBadRequest)
 		return
 	}
 
 	if r.Header.Get("Content-Type") != "text/plain; charset=utf-8" {
-		http.Error(w, "Expected `Content-Type: text/plain; charset=utf-8`",
+		s.Error(w, r, "Expected `Content-Type: text/plain; charset=utf-8`",
 			http.StatusUnsupportedMediaType)
 		return
 	}
 
 	data := make([]byte, 100, 100)
 	if n, _ := r.Body.Read(data); n == 0 {
-		http.Error(w, "Expected a body\r\n", http.StatusBadRequest)
+		s.Error(w, r, "Expected a body\r\n", http.StatusBadRequest)
 		return
 	} else {
 		data = data[:n]
@@ -120,10 +120,10 @@ func (s *Server) handleLevel(pattern string, l public.UserLevel, h http.HandlerF
 	errLevel := "Required a highest level (" + l.String() + ")"
 	s.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 		if u := s.getUser(r); u == nil {
-			http.Error(w, "Need authentification", http.StatusUnauthorized)
+			s.Error(w, r, "Need authentification", http.StatusUnauthorized)
 			return
 		} else if u.Level < l {
-			http.Error(w, errLevel, http.StatusForbidden)
+			s.Error(w, r, errLevel, http.StatusForbidden)
 			return
 		}
 		h(w, r)
@@ -134,7 +134,7 @@ func (s *Server) handleLevel(pattern string, l public.UserLevel, h http.HandlerF
 func (s *Server) userList(w http.ResponseWriter, r *http.Request) {
 	u := s.getUser(r)
 	if u == nil {
-		http.Error(w, "Need authentification", http.StatusUnauthorized)
+		s.Error(w, r, "Need authentification", http.StatusUnauthorized)
 		return
 	}
 
@@ -145,7 +145,7 @@ func (s *Server) userList(w http.ResponseWriter, r *http.Request) {
 	case public.LevelAdmin:
 		filter = func(*User) bool { return true }
 	default:
-		http.Error(w, "Required a stantard level", http.StatusForbidden)
+		s.Error(w, r, "Required a stantard level", http.StatusForbidden)
 		return
 	}
 
@@ -165,7 +165,7 @@ func (s *Server) userList(w http.ResponseWriter, r *http.Request) {
 func (s *Server) getMe(w http.ResponseWriter, r *http.Request) {
 	me := s.getUser(r)
 	if me == nil {
-		http.Error(w, "Who are you?", http.StatusUnauthorized)
+		s.Error(w, r, "Who are you?", http.StatusUnauthorized)
 		return
 	}
 	j, _ := json.Marshal(&me.UserInfo)
@@ -251,7 +251,7 @@ func (s *Server) GodLogin(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("u")
 	var u User
 	if s.db.GetS("user:"+id, &u) {
-		http.Error(w, "User not found", http.StatusNotFound)
+		s.Error(w, r, "User not found", http.StatusNotFound)
 		return
 	}
 
