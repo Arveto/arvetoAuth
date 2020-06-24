@@ -11,7 +11,7 @@ namespace Log {
 				<td>${i.operation}</td>
 				<td>${i.actor}</td>
 				<td>${new Date(i.date).toLocaleString()}</td>
-				<td>${i.value.map(v => `'${v}'`).join('&#8239;; ')}</td>
+				<td>${(i.value || []).map(v => `'${v}'`).join('&#8239;; ')}</td>
 			</tr>`).forEach(i => {
 				tbody.insertAdjacentHTML('beforeend', i)
 			});

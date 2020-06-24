@@ -25,7 +25,7 @@ namespace Deskop {
 		reset();
 		let t = document.getElementById('table');
 		t.hidden = false;
-		t.insertAdjacentHTML('beforeend', '<thead><tr>' +
+		t.insertAdjacentHTML('beforeend', '<thead class="thead-light"><tr>' +
 			head.map(h => `<th scope="col">${h}</th>`).join('') +
 			'</tr></thead><tbody></tbody>');
 		return t.querySelector('tbody');

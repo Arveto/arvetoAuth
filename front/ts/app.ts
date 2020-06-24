@@ -11,29 +11,24 @@ namespace App {
 
 	// List all the application
 	export async function list() {
-		Deskop.list();
-		let listGroup = document.getElementById('list');
+		let table = Deskop.table(['ID', 'Name', 'URL', '']);
 		let l: Array<App> = await (await fetch('/app/list')).json();
-		for (let app of l) {
-			let e = $(`<div class="card card-body">
-				<h3 class="card-title">${app.Name}</h3>
-				<div class="my-1">
-					ID&nbsp;: <mark class="text-monospace">${app.ID}</mark>
-				</div>
-				<div class="my-1">
-					URL&nbsp;: <mark class="text-monospace">${app.URL}</mark>
-				</div>
-				<div class="mt-1">
-					<button type=button id=edit
+		l.forEach(app => {
+			let e = $(`<table><tr>
+					<td>${app.ID}</td>
+					<td>${app.Name}</td>
+					<td>${app.URL}</td>
+					<td>
+						<button type=button id=edit
 							class="btn btn-sm btn-warning">Modifier</button>
-					<button type=button id=rm
+						<button type=button id=rm
 							class="btn btn-sm btn-danger ml-1">Supprimer</button>
-				</div>
-			</div>`);
+					</td>
+				</tr></table>`);
 			e.querySelector('#edit').addEventListener('click', () => edit(app));
 			e.querySelector('#rm').addEventListener('click', () => rm(app));
-			listGroup.append(e);
-		}
+			table.append(e.querySelector('tr'));
+		})
 	}
 	function edit(app: App) {
 		Deskop.edit(`ID&nbsp;: ${app.ID}`, list);
