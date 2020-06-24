@@ -76,10 +76,13 @@ func Create(opt Option) *Server {
 
 	serv.mux.Handle("/style.css", static.Css("front/style.css"))
 	serv.mux.Handle("/app.js", static.Js("front/app.js"))
+	serv.mux.Handle("/favicon.png", static.File("front/favicon.png", "image/png"))
+	serv.mux.Handle("/arveto.jpg", static.File("front/arveto.jpg", "image/jpeg"))
 	index := static.Html("front/index.html")
+	pub := static.Html("front/public.html")
 	serv.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if u := serv.getUser(r); u == nil {
-			loginInHome(w, r)
+			pub.ServeHTTP(w, r)
 			return
 		} else if u.Level < public.LevelVisitor {
 			http.Error(w, "Accréditation trop faible", http.StatusForbidden)
@@ -94,6 +97,7 @@ func Create(opt Option) *Server {
 	serv.mux.HandleFunc("/me", serv.getMe)
 	serv.mux.HandleFunc("/auth", serv.authUser)
 
+	serv.mux.HandleFunc("/login/", loginInHome)
 	serv.mux.HandleFunc("/login/github/", serv.loginGithub)
 
 	serv.mux.HandleFunc("/user/list", serv.userList)
