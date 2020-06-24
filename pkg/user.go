@@ -149,10 +149,10 @@ func (s *Server) userList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	all := make([]User, 0)
+	all := make([]public.UserInfo, 0)
 	s.db.ForS("user:", 0, 0, nil, func(_ string, u *User) {
 		if filter(u) {
-			all = append(all, *u)
+			all = append(all, u.UserInfo)
 		}
 	})
 
