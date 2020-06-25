@@ -54,12 +54,12 @@ namespace User {
 						class="btn btn-sm btn-danger ml-1">Supprimer</button>
 				</td>
 			</tr>`);
-			tr.querySelector('#level').addEventListener('click', () => edit(u));
+			tr.querySelector('#level').addEventListener('click', () => editLevel(u));
 			tr.querySelector('#rm').addEventListener('click', () => rm(u));
 			t.append(tr);
 		});
 	}
-	function edit(u: User) {
+	function editLevel(u: User) {
 		Deskop.edit(`Modification de l'accréditation de ${u.pseudo}`, list);
 		Edit.options(['Ban', 'Candidate', 'Visitor', 'Std', 'Admin'],
 			u.level, 'name', async l => {
@@ -79,5 +79,11 @@ namespace User {
 			}));
 			list();
 		});
+	}
+	// Edit her own configuration
+	export function editMe() {
+		Deskop.edit(`Modification de son compte`, list);
+		Edit.text(me.pseudo, 'Pseudo', '/user/edit/pseudo');
+		Edit.text(me.email, 'Email', '/user/edit/email');
 	}
 }

@@ -60,7 +60,7 @@ namespace Edit {
 
 		g.querySelector('button[type=submit]').addEventListener('click', async () => {
 			spinner.hidden = false;
-			await fetch(to, {
+			let rep = await fetch(to, {
 				method: 'PATCH',
 				headers: new Headers({
 					'Content-Type': 'text/plain; charset=utf-8'
@@ -68,6 +68,7 @@ namespace Edit {
 				body: input.value,
 			});
 			spinner.hidden = true;
+			Deskop.errorRep(rep);
 		});
 	}
 	// Create an option list.
