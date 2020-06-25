@@ -85,6 +85,7 @@ func (s *Server) userEditPseudo(w http.ResponseWriter, r *http.Request) {
 func (s *Server) userEditEmail(w http.ResponseWriter, r *http.Request) {
 	s.usersEdit(w, r, func(u *User, v string) {
 		u.Email = v
+		s.sendMail(v, "Vérification de votre email", "Nous avons votre adresse email! On va pouvoir faire n'importe quoi avec...")
 	})
 }
 func (s *Server) usersEdit(w http.ResponseWriter, r *http.Request, edit func(*User, string)) {
