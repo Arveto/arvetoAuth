@@ -120,6 +120,11 @@ func (s *Server) userRmMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if u.Level == public.LevelAdmin && s.nbAdmin == 1 {
+		s.Error(w, r, "Vous êtes le seul administrateur", http.StatusForbidden)
+		return
+	}
+
 	s.logAdd(u, "/user/rm/me")
 	s.db.DeleteS("user:" + u.ID)
 	s.db.DeleteS("avatar:" + u.ID)

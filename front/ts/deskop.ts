@@ -58,6 +58,7 @@ namespace Deskop {
 
 document.addEventListener("DOMContentLoaded", () => {
 	User.list();
+	document.getElementById('myconfig').addEventListener('click', User.editMe);
 	document.getElementById('userGo').addEventListener('click', User.list);
 	document.getElementById('appGo').addEventListener('click', App.list);
 	document.getElementById('logGo').addEventListener('click', Log.list);

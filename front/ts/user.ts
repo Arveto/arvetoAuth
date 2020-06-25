@@ -16,7 +16,13 @@ namespace User {
 	(async function() {
 		me = await (await fetch('/me')).json();
 		admin = me.level === 'Admin';
+		loadMyAvatar();
 	})();
+
+	function loadMyAvatar() {
+		(<HTMLImageElement>document.querySelector('#myconfig>img'))
+			.src = `/avatar/get?u=${me.id}`;
+	}
 
 	// List the user in #table
 	export async function list() {
@@ -85,5 +91,18 @@ namespace User {
 		Deskop.edit(`Modification de son compte`, list);
 		Edit.text(me.pseudo, 'Pseudo', '/user/edit/pseudo');
 		Edit.text(me.email, 'Email', '/user/edit/email');
+		let rmButton = $('<button type=button class="btn btn-danger btn-lg">Supprime mon compte</button>');
+		rmButton.addEventListener('click', () => {
+			Deskop.edit('Supprime mon compte', editMe);
+			Edit.confirm(me.id, async () => {
+				let rep = await fetch('/user/rm/me');
+				if (rep.status !== 200) {
+					Deskop.errorRep(rep);
+					return;
+				}
+				document.location.replace('/');
+			});
+		});
+		document.getElementById('edit').append(rmButton)
 	}
 }
