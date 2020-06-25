@@ -10,6 +10,7 @@ import (
 	"github.com/HuguesGuilleus/go-db.v1"
 	"github.com/HuguesGuilleus/go-parsersa"
 	"github.com/HuguesGuilleus/static.v1"
+	"github.com/prologic/bitcask"
 	"log"
 	"net/http"
 	"net/smtp"
@@ -57,7 +58,7 @@ func Create(opt Option) *Server {
 
 	serv := &Server{
 		url: opt.URL,
-		db:  db.New(opt.DB),
+		db:  db.New(opt.DB, bitcask.WithMaxValueSize(3_000_000)),
 		key: k,
 		mailAuth: smtp.PlainAuth("",
 			opt.MailLogin,
@@ -108,6 +109,7 @@ func Create(opt Option) *Server {
 	serv.avatarDefault = static.File("front/defautlUser.webp", "image/webp")
 	serv.mux.HandleFunc("/avatar/get", serv.avatarGet)
 	serv.mux.Handle("/avatar/invite", static.File("front/invite.webp", "image/webp"))
+	serv.handleLevel("/avatar/edit", public.LevelStd, serv.avatarEdit)
 
 	serv.mux.HandleFunc("/me", serv.getMe)
 	serv.mux.HandleFunc("/auth", serv.authUser)
