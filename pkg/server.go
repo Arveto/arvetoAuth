@@ -64,9 +64,10 @@ func Create(opt Option) *Server {
 			opt.MailLogin,
 			opt.MailPassword,
 			opt.MailHost),
-		mailLogin: opt.MailLogin,
-		mailHost:  opt.MailHost + ":smtp",
-		errorPage: static.Templ("front/error.html"),
+		mailLogin:     opt.MailLogin,
+		mailHost:      opt.MailHost + ":smtp",
+		errorPage:     static.Templ("front/error.html"),
+		avatarDefault: static.File("front/defautlUser.webp", "image/webp"),
 	}
 
 	// Remove this lines for production
@@ -81,6 +82,7 @@ func Create(opt Option) *Server {
 		})
 	}()
 
+	// Static Handlers
 	serv.mux.Handle("/style.css", static.Css("front/style.css"))
 	serv.mux.Handle("/app.js", static.Js("front/app.js"))
 	serv.mux.Handle("/favicon.png", static.File("front/favicon.png", "image/png"))
@@ -103,42 +105,33 @@ func Create(opt Option) *Server {
 		index.ServeHTTP(w, r)
 	})
 
+	// Handlers
+
 	serv.mux.HandleFunc("/!users", serv.GodUsers)
 	serv.mux.HandleFunc("/!login", serv.GodLogin)
 
-	serv.avatarDefault = static.File("front/defautlUser.webp", "image/webp")
-	serv.mux.HandleFunc("/avatar/get", serv.avatarGet)
-	serv.mux.Handle("/avatar/invite", static.File("front/invite.webp", "image/webp"))
+	serv.handleLevel("/app/add", public.LevelAdmin, serv.appAdd)
+	serv.handleLevel("/app/edit/name", public.LevelAdmin, serv.appEditName)
+	serv.handleLevel("/app/edit/url", public.LevelAdmin, serv.appEditURL)
+	serv.handleLevel("/app/list", public.LevelStd, serv.appList)
+	serv.handleLevel("/app/rm", public.LevelAdmin, serv.appRm)
+	serv.handleLevel("/auth", public.LevelCandidate, serv.authUser)
 	serv.handleLevel("/avatar/edit", public.LevelStd, serv.avatarEdit)
-
-	serv.mux.HandleFunc("/me", serv.getMe)
-	serv.mux.HandleFunc("/auth", serv.authUser)
-	serv.mux.HandleFunc("/logout", serv.logout)
-
-	serv.mux.HandleFunc("/login/", loginInHome)
-	serv.mux.HandleFunc("/login/github/", serv.loginGithub)
-
-	serv.mux.HandleFunc("/user/list", serv.userList)
-	serv.handleLevel("/user/edit/pseudo", public.LevelStd, serv.userEditPseudo)
+	serv.handleLevel("/avatar/get", public.LevelCandidate, serv.avatarGet)
+	serv.handleLevel("/avatar/invite", public.LevelCandidate, static.File("front/invite.webp", "image/webp").ServeHTTP)
+	serv.handleLevel("/log/count", public.LevelStd, serv.logCount)
+	serv.handleLevel("/log/list", public.LevelStd, serv.logList)
+	serv.handleLevel("/login/", public.LevelCandidate, loginInHome)
+	serv.handleLevel("/login/github/", public.LevelCandidate, serv.loginGithub)
+	serv.handleLevel("/logout", public.LevelCandidate, serv.logout)
+	serv.handleLevel("/me", public.LevelCandidate, serv.getMe)
+	serv.handleLevel("/sendmail", public.LevelAdmin, serv.testMail)
 	serv.handleLevel("/user/edit/email", public.LevelStd, serv.userEditEmail)
 	serv.handleLevel("/user/edit/level", public.LevelAdmin, serv.userEditLevel)
-	serv.mux.HandleFunc("/user/rm/me", serv.userRmMe)
+	serv.handleLevel("/user/edit/pseudo", public.LevelStd, serv.userEditPseudo)
+	serv.handleLevel("/user/list", public.LevelCandidate, serv.userList)
+	serv.handleLevel("/user/rm/me", public.LevelCandidate, serv.userRmMe)
 	serv.handleLevel("/user/rm/other", public.LevelAdmin, serv.userRmOther)
-
-	serv.handleLevel("/log/list", public.LevelStd, serv.logList)
-	serv.handleLevel("/log/count", public.LevelStd, serv.logCount)
-
-	serv.handleLevel("/app/list", public.LevelStd, serv.appList)
-	serv.handleLevel("/app/add", public.LevelAdmin, serv.appAdd)
-	serv.handleLevel("/app/rm", public.LevelAdmin, serv.appRm)
-	serv.handleLevel("/app/edit/url", public.LevelAdmin, serv.appEditURL)
-	serv.handleLevel("/app/edit/name", public.LevelAdmin, serv.appEditName)
-
-	serv.handleLevel("/sendmail", public.LevelAdmin, serv.testMail)
-
-	serv.mux.HandleFunc("/r", func(w http.ResponseWriter, _ *http.Request) {
-		redirection(w, "/")
-	})
 
 	return serv
 }

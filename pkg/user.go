@@ -151,6 +151,11 @@ func (s *Server) userRmOther(w http.ResponseWriter, r *http.Request) {
 // Add a http.HandlerFunc to the server.mux. If a client with a lowest level
 // or without authentification, the request are rejected.
 func (s *Server) handleLevel(pattern string, l public.UserLevel, h http.HandlerFunc) {
+	if l == public.LevelCandidate {
+		s.mux.HandleFunc(pattern, h)
+		return
+	}
+
 	errLevel := "Required a highest level (" + l.String() + ")"
 	s.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 		if u := s.getUser(r); u == nil {
@@ -256,7 +261,6 @@ func (s *Server) setCookie(w http.ResponseWriter, r *http.Request, u *User) {
 		Value:    c,
 		Path:     "/",
 		HttpOnly: true,
-		Domain:   r.Host,
 		SameSite: http.SameSiteStrictMode,
 	}).String())
 	w.Header().Add("Set-Cookie", (&http.Cookie{
@@ -264,7 +268,6 @@ func (s *Server) setCookie(w http.ResponseWriter, r *http.Request, u *User) {
 		Value:    u.ID,
 		Path:     "/",
 		HttpOnly: true,
-		Domain:   r.Host,
 		SameSite: http.SameSiteStrictMode,
 	}).String())
 }
