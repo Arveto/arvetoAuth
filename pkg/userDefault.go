@@ -33,6 +33,7 @@ func (s *Server) loadDefaultUsers() {
 	}
 	for _, u := range list {
 		u.Email = u.ID + "@fai.mil"
+		u.Avatar = s.url + "avatar/get?u=" + u.ID
 		s.db.SetS("user:"+u.ID, User{
 			UserInfo: u,
 		})
