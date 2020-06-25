@@ -41,6 +41,8 @@ type Server struct {
 	mailHost  string
 	mailLogin string
 	nbAdmin   int
+	// Default avatar
+	avatarDefault *static.FileServer
 }
 
 func Create(opt Option) *Server {
@@ -102,6 +104,10 @@ func Create(opt Option) *Server {
 
 	serv.mux.HandleFunc("/!users", serv.GodUsers)
 	serv.mux.HandleFunc("/!login", serv.GodLogin)
+
+	serv.avatarDefault = static.File("front/defautlUser.webp", "image/webp")
+	serv.mux.HandleFunc("/avatar/get", serv.avatarGet)
+	serv.mux.Handle("/avatar/invite", static.File("front/invite.webp", "image/webp"))
 
 	serv.mux.HandleFunc("/me", serv.getMe)
 	serv.mux.HandleFunc("/auth", serv.authUser)
