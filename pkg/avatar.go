@@ -5,6 +5,7 @@
 package auth
 
 import (
+	"./avatarreencode"
 	"net/http"
 )
 
@@ -23,4 +24,25 @@ func (s *Server) avatarGet(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Content-Type", "image/webp")
 	w.Write(img)
+}
+
+func (s *Server) avatarEdit(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "PATCH" {
+		s.Error(w, r, "Use PATH method to set an avatar",
+			http.StatusMethodNotAllowed)
+		return
+	}
+
+	img, err := avatarreencode.Reencode(r.Body, r.Header.Get("Content-Type"))
+	switch err {
+	case nil:
+	case avatarreencode.ImageTypeUnknown:
+		s.Error(w, r, err.Error(), http.StatusUnsupportedMediaType)
+		return
+	default:
+		s.Error(w, r, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	s.db.SetSRaw("avatar:"+s.getUser(r).ID, img)
 }
