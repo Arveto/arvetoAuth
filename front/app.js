@@ -38,6 +38,35 @@ var App;
 (function (App) {
     function list() {
         return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                (User.admin ? listAdmin : listSimple)();
+                return [2];
+            });
+        });
+    }
+    App.list = list;
+    function listSimple() {
+        return __awaiter(this, void 0, void 0, function () {
+            var table, l;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        table = Deskop.table(['ID', 'Name', 'URL']);
+                        return [4, fetch('/app/list')];
+                    case 1: return [4, (_a.sent()).json()];
+                    case 2:
+                        l = _a.sent();
+                        l.forEach(function (app) {
+                            var e = $("<tr>\n\t\t\t\t\t<td>" + app.ID + "</td>\n\t\t\t\t\t<td>" + app.Name + "</td>\n\t\t\t\t\t<td>" + app.URL + "</td>\n\t\t\t\t</tr>");
+                            table.append(e);
+                        });
+                        return [2];
+                }
+            });
+        });
+    }
+    function listAdmin() {
+        return __awaiter(this, void 0, void 0, function () {
             var table, l;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -48,17 +77,16 @@ var App;
                     case 2:
                         l = _a.sent();
                         l.forEach(function (app) {
-                            var e = $("<table><tr>\n\t\t\t\t\t<td>" + app.ID + "</td>\n\t\t\t\t\t<td>" + app.Name + "</td>\n\t\t\t\t\t<td>" + app.URL + "</td>\n\t\t\t\t\t<td>\n\t\t\t\t\t\t<button type=button id=edit\n\t\t\t\t\t\t\tclass=\"btn btn-sm btn-warning\">Modifier</button>\n\t\t\t\t\t\t<button type=button id=rm\n\t\t\t\t\t\t\tclass=\"btn btn-sm btn-danger ml-1\">Supprimer</button>\n\t\t\t\t\t</td>\n\t\t\t\t</tr></table>");
+                            var e = $("<tr>\n\t\t\t\t\t<td>" + app.ID + "</td>\n\t\t\t\t\t<td>" + app.Name + "</td>\n\t\t\t\t\t<td>" + app.URL + "</td>\n\t\t\t\t\t<td>\n\t\t\t\t\t\t<button type=button id=edit\n\t\t\t\t\t\t\tclass=\"btn btn-sm btn-warning\">Modifier</button>\n\t\t\t\t\t\t<button type=button id=rm\n\t\t\t\t\t\t\tclass=\"btn btn-sm btn-danger ml-1\">Supprimer</button>\n\t\t\t\t\t</td>\n\t\t\t\t</tr>");
                             e.querySelector('#edit').addEventListener('click', function () { return edit(app); });
                             e.querySelector('#rm').addEventListener('click', function () { return rm(app); });
-                            table.append(e.querySelector('tr'));
+                            table.append(e);
                         });
                         return [2];
                 }
             });
         });
     }
-    App.list = list;
     function edit(app) {
         Deskop.edit("ID&nbsp;: " + app.ID, list);
         Edit.text(app.Name, 'Nom', "/app/edit/name?id=" + app.ID);
@@ -150,15 +178,48 @@ var Deskop;
         document.querySelector('nav').insertAdjacentElement('afterend', e);
     }
     Deskop.error = error;
+    function errorRep(rep) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (!(rep.status !== 200)) return [3, 2];
+                        _a = error;
+                        return [4, rep.text()];
+                    case 1:
+                        _a.apply(void 0, [_b.sent()]);
+                        _b.label = 2;
+                    case 2: return [2];
+                }
+            });
+        });
+    }
+    Deskop.errorRep = errorRep;
 })(Deskop || (Deskop = {}));
 document.addEventListener("DOMContentLoaded", function () {
+    User.list();
+    document.getElementById('myconfig').addEventListener('click', User.editMe);
+    document.getElementById('userGo').addEventListener('click', User.list);
     document.getElementById('appGo').addEventListener('click', App.list);
     document.getElementById('logGo').addEventListener('click', Log.list);
+    var s = document.querySelector('input[type=search]');
+    s.addEventListener('input', function () { return search(s.value); });
 }, { once: true });
+function search(pattern) {
+    pattern = pattern.toLowerCase();
+    Array.from(document.querySelectorAll('tr'))
+        .filter(function (tr) { return tr.parentElement.tagName !== 'THEAD'; })
+        .forEach(function (tr) {
+        tr.hidden = !Array.from(tr.querySelectorAll('td'))
+            .some(function (td) { return td.innerText.toLowerCase().includes(pattern); });
+    });
+}
 function $(html) {
-    var div = document.createElement('div');
+    var table = /^\s*<tr/.test(html);
+    var div = document.createElement(table ? 'table' : 'div');
     div.innerHTML = html;
-    var e = div.firstElementChild;
+    var e = table ? div.querySelector('tr') : div.firstElementChild;
     div.remove();
     return e;
 }
@@ -190,6 +251,7 @@ var Edit;
         input.value = value;
         var spinner = g.querySelector('.spinner-border');
         g.querySelector('button[type=submit]').addEventListener('click', function () { return __awaiter(_this, void 0, void 0, function () {
+            var rep;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -202,14 +264,65 @@ var Edit;
                                 body: input.value
                             })];
                     case 1:
-                        _a.sent();
+                        rep = _a.sent();
                         spinner.hidden = true;
+                        Deskop.errorRep(rep);
                         return [2];
                 }
             });
         }); });
     }
     Edit.text = text;
+    function options(values, current, name, end) {
+        var opt = $("<div class=\"form-group\"></div>");
+        document.getElementById('edit').append(opt);
+        values.forEach(function (v) {
+            var g = $("<div class=\"custom-control custom-radio\">\n\t\t\t\t<input type=radio class=\"custom-control-input\" id=\"" + btoa(v) + "\" name=\"" + btoa(name) + "\">\n\t\t\t\t<label class=\"custom-control-label\" for=\"" + btoa(v) + "\">" + v + "</label>\n\t\t\t</div>");
+            opt.append(g);
+            var input = g.querySelector('input');
+            input.checked = current === v;
+            input.addEventListener('change', function () {
+                if (input.checked) {
+                    end(v);
+                }
+            });
+        });
+    }
+    Edit.options = options;
+    function avatar() {
+        var _this = this;
+        var g = $("<div class=\"input-group mb-3\">\n\t\t\t<input type=file id=avatarInput hidden accept=\"image/png,image/jpeg,image/gif,image/webp\">\n\t\t\t<label for=avatarInput>\n\t\t\t\tEnvoyer une image&nbsp;:<br>\n\t\t\t\t<img class=\"rounded\" src=\"" + User.me.avatar + "\">\n\t\t\t</label>\n\t\t</div>");
+        document.getElementById('edit').append(g);
+        var input = g.querySelector('input');
+        input.addEventListener('input', function () { return __awaiter(_this, void 0, void 0, function () {
+            var f, rep, _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        f = input.files[0];
+                        _a = fetch;
+                        _b = ['/avatar/edit'];
+                        _c = {
+                            method: 'PATCH',
+                            headers: new Headers({
+                                'Content-Type': f.type
+                            })
+                        };
+                        return [4, f.arrayBuffer()];
+                    case 1: return [4, _a.apply(void 0, _b.concat([(_c.body = _d.sent(),
+                                _c)]))];
+                    case 2:
+                        rep = _d.sent();
+                        if (rep.status === 200) {
+                            document.location.reload();
+                        }
+                        Deskop.errorRep(rep);
+                        return [2];
+                }
+            });
+        }); });
+    }
+    Edit.avatar = avatar;
 })(Edit || (Edit = {}));
 var Log;
 (function (Log) {
@@ -236,23 +349,140 @@ var Log;
 })(Log || (Log = {}));
 var User;
 (function (User) {
-    function list() {
+    (function () {
         return __awaiter(this, void 0, void 0, function () {
-            var t, l;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        t = Deskop.table(['', 'ID', 'Pseudo', 'Email', 'Level']);
-                        return [4, fetch('/user/list')];
+                    case 0: return [4, fetch('/me')];
                     case 1: return [4, (_a.sent()).json()];
                     case 2:
-                        l = _a.sent();
-                        console.log("l:", l);
-                        l.forEach(function (u) { return t.insertAdjacentHTML('beforeend', "<tr>\n\t\t\t<td></td>\n\t\t\t<td>" + u.login + "</td>\n\t\t\t<td>" + u.pseudo + "</td>\n\t\t\t<td>" + u.email + "</td>\n\t\t\t<td>" + u.level + "</td>\n\t\t</tr>"); });
+                        User.me = _a.sent();
+                        User.admin = User.me.level === 'Admin';
+                        loadMyAvatar();
+                        return [2];
+                }
+            });
+        });
+    })();
+    function loadMyAvatar() {
+        document.querySelector('#myconfig>img')
+            .src = "/avatar/get?u=" + User.me.id;
+    }
+    function list() {
+        return __awaiter(this, void 0, void 0, function () {
+            var l;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, fetch('/user/list')];
+                    case 1: return [4, (_a.sent()).json()];
+                    case 2:
+                        l = (_a.sent())
+                            .filter(function (u) { return u.id != User.me.id; });
+                        (User.admin ? listAdmin : listSimple)(l);
                         return [2];
                 }
             });
         });
     }
     User.list = list;
+    function listSimple(l) {
+        return __awaiter(this, void 0, void 0, function () {
+            var t;
+            return __generator(this, function (_a) {
+                t = Deskop.table(['', 'ID', 'Pseudo', 'Email', 'Level']);
+                l.forEach(function (u) {
+                    t.insertAdjacentHTML('beforeend', "<tr>\n\t\t\t\t<td class=\"align-middle\"><img src=\"" + u.avatar + "\"\n\t\t\t\t\tclass=\"rounded\" style=\"width:3em;\"></td>\n\t\t\t\t<td class=\"align-middle\">" + u.id + "</td>\n\t\t\t\t<td class=\"align-middle\">" + u.pseudo + "</td>\n\t\t\t\t<td class=\"align-middle\">" + u.email + "</td>\n\t\t\t\t<td class=\"align-middle\">" + u.level + "</td>\n\t\t\t</tr>");
+                });
+                return [2];
+            });
+        });
+    }
+    function listAdmin(l) {
+        return __awaiter(this, void 0, void 0, function () {
+            var t;
+            return __generator(this, function (_a) {
+                t = Deskop.table(['', 'ID', 'Pseudo', 'Email', 'Level', '']);
+                l.forEach(function (u) {
+                    var tr = $("<tr>\n\t\t\t\t<td class=\"align-middle\"><img src=\"" + u.avatar + "\"\n\t\t\t\t\tclass=\"rounded\" style=\"width:3em;\"></td>\n\t\t\t\t<td class=\"align-middle\">" + u.id + "</td>\n\t\t\t\t<td class=\"align-middle\">" + u.pseudo + "</td>\n\t\t\t\t<td class=\"align-middle\">" + u.email + "</td>\n\t\t\t\t<td class=\"align-middle\">" + u.level + "</td>\n\t\t\t\t<td class=\"align-middle\">\n\t\t\t\t\t<button type=button id=level\n\t\t\t\t\t\tclass=\"btn btn-sm btn-warning\">Modifier</button>\n\t\t\t\t\t<button type=button id=rm\n\t\t\t\t\t\tclass=\"btn btn-sm btn-danger ml-1\">Supprimer</button>\n\t\t\t\t</td>\n\t\t\t</tr>");
+                    tr.querySelector('#level').addEventListener('click', function () { return editLevel(u); });
+                    tr.querySelector('#rm').addEventListener('click', function () { return rm(u); });
+                    t.append(tr);
+                });
+                return [2];
+            });
+        });
+    }
+    function editLevel(u) {
+        var _this = this;
+        Deskop.edit("Modification de l'accr\u00E9ditation de " + u.pseudo, list);
+        Edit.options(['Ban', 'Candidate', 'Visitor', 'Std', 'Admin'], u.level, 'name', function (l) { return __awaiter(_this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = Deskop).errorRep;
+                        return [4, fetch("/user/edit/level?u=" + u.id, {
+                                method: 'PATCH',
+                                headers: new Headers({ 'Content-Type': 'application/json' }),
+                                body: JSON.stringify(l)
+                            })];
+                    case 1: return [4, _b.apply(_a, [_c.sent()])];
+                    case 2:
+                        _c.sent();
+                        list();
+                        return [2];
+                }
+            });
+        }); });
+    }
+    function rm(u) {
+        var _this = this;
+        Deskop.edit("Modification de l'accr\u00E9ditation de " + u.pseudo, list);
+        Edit.confirm(u.id, function () { return __awaiter(_this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = Deskop).errorRep;
+                        return [4, fetch("/user/rm/other?u=" + u.id, {
+                                method: 'PATCH'
+                            })];
+                    case 1: return [4, _b.apply(_a, [_c.sent()])];
+                    case 2:
+                        _c.sent();
+                        list();
+                        return [2];
+                }
+            });
+        }); });
+    }
+    function editMe() {
+        var _this = this;
+        Deskop.edit("Modification de son compte", list);
+        Edit.text(User.me.pseudo, 'Pseudo', '/user/edit/pseudo');
+        Edit.text(User.me.email, 'Email', '/user/edit/email');
+        Edit.avatar();
+        var rmButton = $('<button type=button class="btn btn-danger btn-lg">Supprime mon compte</button>');
+        rmButton.addEventListener('click', function () {
+            Deskop.edit('Supprime mon compte', editMe);
+            Edit.confirm(User.me.id, function () { return __awaiter(_this, void 0, void 0, function () {
+                var rep;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4, fetch('/user/rm/me')];
+                        case 1:
+                            rep = _a.sent();
+                            if (rep.status !== 200) {
+                                Deskop.errorRep(rep);
+                                return [2];
+                            }
+                            document.location.replace('/');
+                            return [2];
+                    }
+                });
+            }); });
+        });
+        document.getElementById('edit').append(rmButton);
+    }
+    User.editMe = editMe;
 })(User || (User = {}));

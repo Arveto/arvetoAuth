@@ -91,6 +91,7 @@ namespace User {
 		Deskop.edit(`Modification de son compte`, list);
 		Edit.text(me.pseudo, 'Pseudo', '/user/edit/pseudo');
 		Edit.text(me.email, 'Email', '/user/edit/email');
+		Edit.avatar();
 		let rmButton = $('<button type=button class="btn btn-danger btn-lg">Supprime mon compte</button>');
 		rmButton.addEventListener('click', () => {
 			Deskop.edit('Supprime mon compte', editMe);

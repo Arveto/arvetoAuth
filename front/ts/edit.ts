@@ -90,4 +90,29 @@ namespace Edit {
 			});
 		});
 	}
+	export function avatar() {
+		let g = $(`<div class="input-group mb-3">
+			<input type=file id=avatarInput hidden accept="image/png,image/jpeg,image/gif,image/webp">
+			<label for=avatarInput>
+				Envoyer une image&nbsp;:<br>
+				<img class="rounded" src="${User.me.avatar}">
+			</label>
+		</div>`);
+		document.getElementById('edit').append(g);
+		let input = g.querySelector('input');
+		input.addEventListener('input', async () => {
+			let f = input.files[0];
+			let rep = await fetch('/avatar/edit', {
+				method: 'PATCH',
+				headers: new Headers({
+					'Content-Type': f.type,
+				}),
+				body: await f.arrayBuffer(),
+			});
+			if (rep.status === 200) {
+				document.location.reload();
+			}
+			Deskop.errorRep(rep);
+		});
+	}
 }
