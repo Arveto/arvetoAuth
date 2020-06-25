@@ -48,6 +48,12 @@ namespace Deskop {
 		e.querySelector('button.close').addEventListener('click', () => e.remove());
 		document.querySelector('nav').insertAdjacentElement('afterend', e);
 	}
+	// Display the error if the request fail.
+	export async function errorRep(rep: Response) {
+		if (rep.status !== 200) {
+			error(await rep.text());
+		}
+	}
 }
 
 document.addEventListener("DOMContentLoaded", () => {

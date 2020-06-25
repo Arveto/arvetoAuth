@@ -70,4 +70,23 @@ namespace Edit {
 			spinner.hidden = true;
 		});
 	}
+	// Create an option list.
+	export function options(values: string[], current: string, name: string, end: (string) => void) {
+		let opt = $(`<div class="form-group"></div>`);
+		document.getElementById('edit').append(opt);
+		values.forEach(v => {
+			let g = $(`<div class="custom-control custom-radio">
+				<input type=radio class="custom-control-input" id="${btoa(v)}" name="${btoa(name)}">
+				<label class="custom-control-label" for="${btoa(v)}">${v}</label>
+			</div>`);
+			opt.append(g);
+			let input = g.querySelector('input');
+			input.checked = current === v;
+			input.addEventListener('change', () => {
+				if (input.checked) {
+					end(v);
+				}
+			});
+		});
+	}
 }

@@ -54,7 +54,30 @@ namespace User {
 						class="btn btn-sm btn-danger ml-1">Supprimer</button>
 				</td>
 			</tr>`);
+			tr.querySelector('#level').addEventListener('click', () => edit(u));
+			tr.querySelector('#rm').addEventListener('click', () => rm(u));
 			t.append(tr);
+		});
+	}
+	function edit(u: User) {
+		Deskop.edit(`Modification de l'accréditation de ${u.pseudo}`, list);
+		Edit.options(['Ban', 'Candidate', 'Visitor', 'Std', 'Admin'],
+			u.level, 'name', async l => {
+				await Deskop.errorRep(await fetch(`/user/edit/level?u=${u.id}`, {
+					method: 'PATCH',
+					headers: new Headers({ 'Content-Type': 'application/json' }),
+					body: JSON.stringify(l),
+				}));
+				list();
+			});
+	}
+	function rm(u: User) {
+		Deskop.edit(`Modification de l'accréditation de ${u.pseudo}`, list);
+		Edit.confirm(u.id, async () => {
+			await Deskop.errorRep(await fetch(`/user/rm/other?u=${u.id}`, {
+				method: 'PATCH',
+			}));
+			list();
 		});
 	}
 }
