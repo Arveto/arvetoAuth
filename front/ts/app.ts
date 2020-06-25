@@ -11,10 +11,25 @@ namespace App {
 
 	// List all the application
 	export async function list() {
+		(User.admin ? listAdmin : listSimple)()
+	}
+	async function listSimple() {
+		let table = Deskop.table(['ID', 'Name', 'URL']);
+		let l: Array<App> = await (await fetch('/app/list')).json();
+		l.forEach(app => {
+			let e = $(`<tr>
+					<td>${app.ID}</td>
+					<td>${app.Name}</td>
+					<td>${app.URL}</td>
+				</tr>`);
+			table.append(e);
+		})
+	}
+	async function listAdmin() {
 		let table = Deskop.table(['ID', 'Name', 'URL', '']);
 		let l: Array<App> = await (await fetch('/app/list')).json();
 		l.forEach(app => {
-			let e = $(`<table><tr>
+			let e = $(`<tr>
 					<td>${app.ID}</td>
 					<td>${app.Name}</td>
 					<td>${app.URL}</td>
@@ -24,10 +39,10 @@ namespace App {
 						<button type=button id=rm
 							class="btn btn-sm btn-danger ml-1">Supprimer</button>
 					</td>
-				</tr></table>`);
+				</tr>`);
 			e.querySelector('#edit').addEventListener('click', () => edit(app));
 			e.querySelector('#rm').addEventListener('click', () => rm(app));
-			table.append(e.querySelector('tr'));
+			table.append(e);
 		})
 	}
 	function edit(app: App) {

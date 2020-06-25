@@ -51,15 +51,17 @@ namespace Deskop {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+	document.getElementById('userGo').addEventListener('click', User.list);
 	document.getElementById('appGo').addEventListener('click', App.list);
 	document.getElementById('logGo').addEventListener('click', Log.list);
 }, { once: true, });
 
 // Create an element and return it.
 function $(html: string): Element {
-	let div = document.createElement('div');
+	let table = /^\s*<tr/.test(html);
+	let div = document.createElement(table ? 'table' : 'div');
 	div.innerHTML = html;
-	let e = div.firstElementChild;
+	let e = table ? div.querySelector('tr') : div.firstElementChild;
 	div.remove();
 	return e;
 }
