@@ -42,7 +42,7 @@ func (s *Server) loginGithub(w http.ResponseWriter, r *http.Request) {
 		u.Pseudo = info.Pseudo
 		u.Email = info.Email
 
-		// TODO: get Avatar
+		go s.avatarFromURL(&u, info.Icon)
 
 		if s.nbAdmin > 0 {
 			u.Level = public.LevelCandidate

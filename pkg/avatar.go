@@ -46,3 +46,20 @@ func (s *Server) avatarEdit(w http.ResponseWriter, r *http.Request) {
 
 	s.db.SetSRaw("avatar:"+s.getUser(r).ID, img)
 }
+
+// Get the avatar from an URL. The error should no logged.
+func (s *Server) avatarFromURL(u *User, from string) {
+	if from == "" {
+		return
+	}
+
+	rep, err := http.Get(from)
+	if err != nil {
+		return
+	}
+	img, err := avatarreencode.Reencode(rep.Body, rep.Header.Get("Content-Type"))
+	if err != nil {
+		return
+	}
+	s.db.SetSRaw("avatar:"+u.ID, img)
+}
