@@ -51,10 +51,24 @@ namespace Deskop {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+	User.list();
 	document.getElementById('userGo').addEventListener('click', User.list);
 	document.getElementById('appGo').addEventListener('click', App.list);
 	document.getElementById('logGo').addEventListener('click', Log.list);
+	let s: HTMLInputElement = document.querySelector('input[type=search]');
+	s.addEventListener('input', () => search(s.value));
 }, { once: true, });
+
+// Make a search into #table.
+function search(pattern: string) {
+	pattern = pattern.toLowerCase();
+	Array.from(document.querySelectorAll('tr'))
+		.filter(tr => tr.parentElement.tagName !== 'THEAD')
+		.forEach(tr => {
+			tr.hidden = !Array.from(tr.querySelectorAll('td'))
+				.some(td => td.innerText.toLowerCase().includes(pattern));
+		});
+}
 
 // Create an element and return it.
 function $(html: string): Element {
