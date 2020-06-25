@@ -122,6 +122,7 @@ func (s *Server) userRmMe(w http.ResponseWriter, r *http.Request) {
 
 	s.logAdd(u, "/user/rm/me")
 	s.db.DeleteS("user:" + u.ID)
+	s.db.DeleteS("avatar:" + u.ID)
 
 	s.Error(w, r, "Supprétion réussi", http.StatusOK)
 }
@@ -133,16 +134,16 @@ func (s *Server) userRmOther(w http.ResponseWriter, r *http.Request) {
 		s.Error(w, r, "Need an user (?u=userID) in params", http.StatusBadRequest)
 		return
 	}
-	id = "user:" + id
 
 	var u User
-	if s.db.GetS(id, &u) {
+	if s.db.GetS("user:"+id, &u) {
 		s.Error(w, r, "User not Found", http.StatusNotFound)
 		return
 	}
 
 	s.logAdd(s.getUser(r), "/user/rm/other", u.ID)
-	s.db.DeleteS(id)
+	s.db.DeleteS("user:" + id)
+	s.db.DeleteS("avatar:" + u.ID)
 	s.Error(w, r, "User deleted", http.StatusOK)
 }
 
