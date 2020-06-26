@@ -87,7 +87,7 @@ func Create(opt Option) *Server {
 	serv.mux.Handle("/app.js", static.Js("front/app.js"))
 	serv.mux.Handle("/favicon.png", static.File("front/favicon.png", "image/png"))
 	serv.mux.Handle("/arveto.jpg", static.File("front/arveto.jpg", "image/jpeg"))
-	serv.mux.Handle("/alberto_sans_fond.png", static.File("front/arveto.jpg", "image/png"))
+	serv.mux.Handle("/alberto_sans_fond.png", static.File("front/alberto_sans_fond.png", "image/png"))
 	index := static.Html("front/index.html")
 	pub := static.Html("front/public.html")
 	serv.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
