@@ -125,6 +125,8 @@ func Create(opt Option) *Server {
 		static.Html("front/login.html").ServeHTTP)
 	serv.handleLevel("/login/from/github/", public.LevelCandidate, serv.loginFromGithub)
 	serv.handleLevel("/login/with/github/", public.LevelCandidate, serv.loginWithGithub)
+	serv.handleLevel("/login/from/google/", public.LevelCandidate, serv.loginFromGoogle)
+	serv.handleLevel("/login/with/google/", public.LevelCandidate, serv.loginWithGoogle)
 	serv.handleLevel("/logout", public.LevelCandidate, serv.logout)
 	serv.handleLevel("/me", public.LevelCandidate, serv.getMe)
 	serv.handleLevel("/sendmail", public.LevelAdmin, serv.testMail)

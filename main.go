@@ -7,6 +7,7 @@ package main
 import (
 	"./pkg"
 	"./pkg/github"
+	"./pkg/google"
 	"github.com/HuguesGuilleus/static.v1"
 	"gopkg.in/ini.v1"
 	"log"
@@ -22,14 +23,19 @@ func main() {
 		log.Fatal(err)
 	}
 
+	url := config.Section("").Key("url").String()
+
 	// Load github access
 	github.Conf.ClientID = config.Section("github").Key("client").String()
 	github.Conf.ClientSecret = config.Section("github").Key("secret").String()
+	google.Conf.ClientID = config.Section("google").Key("client").String()
+	google.Conf.ClientSecret = config.Section("google").Key("secret").String()
+	google.Conf.RedirectURL = url + "login/from/google/"
 
 	// Launch the server.
 	log.Fatal(http.ListenAndServe(":8000", auth.Create(auth.Option{
 		Key:          "data/key.pem",
-		URL:          "http://localhost:8000/",
+		URL:          url,
 		MailHost:     config.Section("mail").Key("host").String(),
 		MailLogin:    config.Section("mail").Key("login").String(),
 		MailPassword: config.Section("mail").Key("password").String(),
