@@ -121,8 +121,10 @@ func Create(opt Option) *Server {
 	serv.handleLevel("/avatar/invite", public.LevelCandidate, static.File("front/invite.webp", "image/webp").ServeHTTP)
 	serv.handleLevel("/log/count", public.LevelStd, serv.logCount)
 	serv.handleLevel("/log/list", public.LevelStd, serv.logList)
-	serv.handleLevel("/login/", public.LevelCandidate, loginInHome)
-	serv.handleLevel("/login/github/", public.LevelCandidate, serv.loginGithub)
+	serv.handleLevel("/login/", public.LevelCandidate,
+		static.Html("front/login.html").ServeHTTP)
+	serv.handleLevel("/login/from/github/", public.LevelCandidate, serv.loginFromGithub)
+	serv.handleLevel("/login/with/github/", public.LevelCandidate, serv.loginWithGithub)
 	serv.handleLevel("/logout", public.LevelCandidate, serv.logout)
 	serv.handleLevel("/me", public.LevelCandidate, serv.getMe)
 	serv.handleLevel("/sendmail", public.LevelAdmin, serv.testMail)

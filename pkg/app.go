@@ -51,7 +51,8 @@ func (s *Server) authUser(w http.ResponseWriter, r *http.Request) {
 		}
 		redirection(w, to+"jwt="+jwt)
 	} else {
-		s.loginIn(w, r, app.ID)
+		http.Redirect(w, r, "/login/?app="+app.ID+"&r="+r.URL.Query().Get("r"),
+			http.StatusTemporaryRedirect)
 	}
 }
 

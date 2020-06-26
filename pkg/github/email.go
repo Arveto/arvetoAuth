@@ -9,7 +9,7 @@ import (
 
 var emailNotFound = errors.New("Email not found")
 
-type Emails []struct {
+type emails []struct {
 	Email    string `json:"email"`
 	Verified bool   `json:"verified"`
 	Primary  bool   `json:"primary"`
@@ -34,7 +34,7 @@ func getMail(token string) (string, error) {
 		return "", err
 	}
 
-	var list Emails
+	var list emails
 	err = json.Unmarshal(data, &list)
 
 	if len(list) == 0 {
