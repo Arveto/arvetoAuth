@@ -4,9 +4,9 @@
 
 namespace Deskop {
 	// Clear all grousp and display #list.
-	export function list() {
+	export function create() {
 		reset();
-		document.getElementById('list').hidden = false;
+		document.getElementById('create').hidden = false;
 	}
 	// Clear all groups and display #edit, append an title and a button
 	// to return to a before state.
@@ -31,7 +31,7 @@ namespace Deskop {
 		return t.querySelector('tbody');
 	}
 	function reset() {
-		const groups = ['list', 'edit', 'table'];
+		const groups = ['edit', 'table'];
 
 		groups
 			.map(g => `#${g}>*`)
@@ -40,6 +40,8 @@ namespace Deskop {
 		groups
 			.map(g => document.getElementById(g))
 			.forEach(e => e.hidden = true);
+
+		document.getElementById('create').hidden = true;
 	}
 	// Display an error
 	export function error(m: string) {
@@ -62,6 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById('userGo').addEventListener('click', User.list);
 	document.getElementById('appGo').addEventListener('click', App.list);
 	document.getElementById('logGo').addEventListener('click', Log.list);
+	document.getElementById('createGo').addEventListener('click', Deskop.create);
+	document.getElementById('createApplication').addEventListener('click', App.create);
 	let s: HTMLInputElement = document.querySelector('input[type=search]');
 	s.addEventListener('input', () => search(s.value));
 }, { once: true, });

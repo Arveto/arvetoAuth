@@ -16,6 +16,7 @@ namespace User {
 	(async function() {
 		me = await (await fetch('/me')).json();
 		admin = me.level === 'Admin';
+		document.getElementById('createGo').hidden = me.level !== 'Admin';
 		loadMyAvatar();
 	})();
 
