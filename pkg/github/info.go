@@ -1,24 +1,29 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/github"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 )
 
 var (
-	Client   = ""
-	Secret   = ""
 	loginURL = ""
+	ctx      = context.Background()
+	// Please config: ClientID and ClientSecret
+	Conf = oauth2.Config{
+		Endpoint: github.Endpoint,
+	}
 )
 
 // Return and URL to come to GitHub signing page.
 func URL(redirect string) string {
-	if loginURL == "" && Client != "" {
+	if loginURL == "" {
 		loginURL = "https://github.com/login/oauth/authorize?" +
 			"scope=user%3Aemail" +
-			"&client_id=" + Client
+			"&client_id=" + Conf.ClientID
 	}
 
 	if redirect != "" {
@@ -37,18 +42,19 @@ type Info struct {
 }
 
 func NewInfo(r *http.Request) (*Info, error) {
-	// Get tocken
-	token, err := loginGetToken(r.URL.Query().Get("code"))
+	t, err := Conf.Exchange(ctx, r.URL.Query().Get("code"))
 	if err != nil {
 		return nil, err
 	}
+	client := Conf.Client(ctx, t)
 
 	// Get information
-	i, err := getInfo(token)
+	i, err := getInfo(client)
 	if err != nil {
 		return nil, err
 	}
-	i.Email, err = getMail(token)
+	// Get email adress
+	i.Email, err = getMail(client)
 	if i.Pseudo == "" {
 		i.Pseudo = i.Login
 	}
@@ -56,14 +62,8 @@ func NewInfo(r *http.Request) (*Info, error) {
 	return i, err
 }
 
-func getInfo(token string) (*Info, error) {
-	req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Authorization", "token "+token)
-
-	resp, err := (&http.Client{}).Do(req)
+func getInfo(client *http.Client) (*Info, error) {
+	resp, err := client.Get("https://api.github.com/user")
 	if err != nil {
 		return nil, err
 	}
@@ -77,30 +77,4 @@ func getInfo(token string) (*Info, error) {
 	var i Info
 	err = json.Unmarshal(data, &i)
 	return &i, err
-}
-
-// Get the token with user code
-func loginGetToken(code string) (string, error) {
-	q := url.Values{}
-	q.Add("client_id", Client)
-	q.Add("client_secret", Secret)
-	q.Add("code", code)
-
-	rep, err := http.PostForm("https://github.com/login/oauth/access_token", q)
-	if err != nil {
-		return "", err
-	}
-	defer rep.Body.Close()
-
-	all, err := ioutil.ReadAll(rep.Body)
-	if err != nil {
-		return "", err
-	}
-
-	values, err := url.ParseQuery(string(all))
-	if err != nil {
-		return "", err
-	}
-
-	return values.Get("access_token"), nil
 }

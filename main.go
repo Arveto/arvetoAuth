@@ -23,8 +23,8 @@ func main() {
 	}
 
 	// Load github access
-	github.Client = config.Section("github").Key("client").String()
-	github.Secret = config.Section("github").Key("secret").String()
+	github.Conf.ClientID = config.Section("github").Key("client").String()
+	github.Conf.ClientSecret = config.Section("github").Key("secret").String()
 
 	// Launch the server.
 	log.Fatal(http.ListenAndServe(":8000", auth.Create(auth.Option{

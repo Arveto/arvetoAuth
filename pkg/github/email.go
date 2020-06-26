@@ -16,14 +16,8 @@ type emails []struct {
 }
 
 // Get the Emails.
-func getMail(token string) (string, error) {
-	req, err := http.NewRequest("GET", "https://api.github.com/user/emails", nil)
-	if err != nil {
-		return "", err
-	}
-	req.Header.Add("Authorization", "token "+token)
-
-	resp, err := (&http.Client{}).Do(req)
+func getMail(client *http.Client) (string, error) {
+	resp, err := client.Get("https://api.github.com/user/emails")
 	if err != nil {
 		return "", err
 	}
