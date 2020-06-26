@@ -16,8 +16,20 @@ namespace Edit {
 			</div>
 		</div>`);
 		document.getElementById('edit').appendChild(g);
-		g.querySelector('button[type=submit]').addEventListener('click', () => {
-			end(g.querySelector('input').value);
+
+		let input = g.querySelector('input');
+		function call() {
+			if (!input.value) {
+				return;
+			}
+			end(input.value);
+		}
+		g.querySelector('button[type=submit]').addEventListener('click', call);
+		input.addEventListener('keydown', event => {
+			if (event.key !== 'Enter') {
+				return;
+			}
+			call();
 		});
 	}
 	// Create a text confirm. When done, execute the callBack.
@@ -58,7 +70,10 @@ namespace Edit {
 		input.value = value;
 		let spinner: HTMLElement = g.querySelector('.spinner-border');
 
-		g.querySelector('button[type=submit]').addEventListener('click', async () => {
+		async function send() {
+			if (!input.value || input.value === value) {
+				return;
+			}
 			spinner.hidden = false;
 			let rep = await fetch(to, {
 				method: 'PATCH',
@@ -69,7 +84,25 @@ namespace Edit {
 			});
 			spinner.hidden = true;
 			Deskop.errorRep(rep);
+		}
+
+		input.addEventListener('keydown', event => {
+			if (event.key !== 'Enter') {
+				return;
+			}
+			send();
+			nextFocus(input);
 		});
+		g.querySelector('button[type=submit]').addEventListener('click', send);
+	}
+	// Focus on the next input
+	function nextFocus(input: HTMLInputElement) {
+		let list = <NodeListOf<HTMLInputElement>>document.querySelectorAll('input[type=text]');
+		for (let i = 0; i < list.length; i++) {
+			if (list[i] === input && i + 1 < list.length) {
+				list[i + 1].focus();
+			}
+		}
 	}
 	// Create an option list.
 	export function options(values: string[], current: string, name: string, end: (string) => void) {

@@ -135,11 +135,11 @@ var App;
 })(App || (App = {}));
 var Deskop;
 (function (Deskop) {
-    function list() {
+    function create() {
         reset();
-        document.getElementById('list').hidden = false;
+        document.getElementById('create').hidden = false;
     }
-    Deskop.list = list;
+    Deskop.create = create;
     function edit(title, endCB) {
         reset();
         var editGroup = document.getElementById('edit');
@@ -161,13 +161,14 @@ var Deskop;
     }
     Deskop.table = table;
     function reset() {
-        var groups = ['list', 'edit', 'table'];
+        var groups = ['edit', 'table'];
         groups
             .map(function (g) { return "#" + g + ">*"; })
             .forEach(function (g) { return document.querySelectorAll(g).forEach(function (e) { return e.remove(); }); });
         groups
             .map(function (g) { return document.getElementById(g); })
             .forEach(function (e) { return e.hidden = true; });
+        document.getElementById('create').hidden = true;
     }
     function error(m) {
         if (!m) {
@@ -203,6 +204,8 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('userGo').addEventListener('click', User.list);
     document.getElementById('appGo').addEventListener('click', App.list);
     document.getElementById('logGo').addEventListener('click', Log.list);
+    document.getElementById('createGo').addEventListener('click', Deskop.create);
+    document.getElementById('createApplication').addEventListener('click', App.create);
     var s = document.querySelector('input[type=search]');
     s.addEventListener('input', function () { return search(s.value); });
 }, { once: true });
@@ -228,8 +231,19 @@ var Edit;
     function create(name, end) {
         var g = $("<div class=\"input-group input-group-lg mb-3\">\n\t\t\t<div class=\"input-group-prepend\">\n\t\t\t\t<span class=\"input-group-text\">" + name + "&nbsp;: </span>\n\t\t\t</div>\n\t\t\t<input type=text required class=\"form-control\">\n\t\t\t<div class=\"input-group-append\">\n\t\t\t\t<button type=submit class=\"btn btn-success\">Creer</button>\n\t\t\t</div>\n\t\t</div>");
         document.getElementById('edit').appendChild(g);
-        g.querySelector('button[type=submit]').addEventListener('click', function () {
-            end(g.querySelector('input').value);
+        var input = g.querySelector('input');
+        function call() {
+            if (!input.value) {
+                return;
+            }
+            end(input.value);
+        }
+        g.querySelector('button[type=submit]').addEventListener('click', call);
+        input.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter') {
+                return;
+            }
+            call();
         });
     }
     Edit.create = create;
@@ -244,35 +258,55 @@ var Edit;
     }
     Edit.confirm = confirm;
     function text(value, name, to) {
-        var _this = this;
         var g = $("<div class=\"input-group input-group-lg mb-3\">\n\t\t\t<div class=\"input-group-prepend\">\n\t\t\t\t<span class=\"input-group-text\">" + name + "&nbsp;: </span>\n\t\t\t</div>\n\t\t\t<input type=text required class=\"form-control\">\n\t\t\t<div class=\"input-group-append\">\n\t\t\t\t<button type=submit class=\"btn btn-success\">\n\t\t\t\t\t<span hidden class=\"spinner-border spinner-border-sm mr-2\"></span>\n\t\t\t\t\tEnvoyer\n\t\t\t\t</button>\n\t\t\t</div>\n\t\t</div>");
         document.getElementById('edit').appendChild(g);
         var input = g.querySelector('input');
         input.value = value;
         var spinner = g.querySelector('.spinner-border');
-        g.querySelector('button[type=submit]').addEventListener('click', function () { return __awaiter(_this, void 0, void 0, function () {
-            var rep;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        spinner.hidden = false;
-                        return [4, fetch(to, {
-                                method: 'PATCH',
-                                headers: new Headers({
-                                    'Content-Type': 'text/plain; charset=utf-8'
-                                }),
-                                body: input.value
-                            })];
-                    case 1:
-                        rep = _a.sent();
-                        spinner.hidden = true;
-                        Deskop.errorRep(rep);
-                        return [2];
-                }
+        function send() {
+            return __awaiter(this, void 0, void 0, function () {
+                var rep;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (!input.value || input.value === value) {
+                                return [2];
+                            }
+                            spinner.hidden = false;
+                            return [4, fetch(to, {
+                                    method: 'PATCH',
+                                    headers: new Headers({
+                                        'Content-Type': 'text/plain; charset=utf-8'
+                                    }),
+                                    body: input.value
+                                })];
+                        case 1:
+                            rep = _a.sent();
+                            spinner.hidden = true;
+                            Deskop.errorRep(rep);
+                            return [2];
+                    }
+                });
             });
-        }); });
+        }
+        input.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter') {
+                return;
+            }
+            send();
+            nextFocus(input);
+        });
+        g.querySelector('button[type=submit]').addEventListener('click', send);
     }
     Edit.text = text;
+    function nextFocus(input) {
+        var list = document.querySelectorAll('input[type=text]');
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] === input && i + 1 < list.length) {
+                list[i + 1].focus();
+            }
+        }
+    }
     function options(values, current, name, end) {
         var opt = $("<div class=\"form-group\"></div>");
         document.getElementById('edit').append(opt);
@@ -358,6 +392,7 @@ var User;
                     case 2:
                         User.me = _a.sent();
                         User.admin = User.me.level === 'Admin';
+                        document.getElementById('createGo').hidden = User.me.level !== 'Admin';
                         loadMyAvatar();
                         return [2];
                 }
