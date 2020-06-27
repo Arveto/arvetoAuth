@@ -202,8 +202,9 @@ document.addEventListener("DOMContentLoaded", function () {
     User.list();
     document.getElementById('myconfig').addEventListener('click', User.editMe);
     document.getElementById('userGo').addEventListener('click', User.list);
-    document.getElementById('appGo').addEventListener('click', App.list);
     document.getElementById('logGo').addEventListener('click', Log.list);
+    document.getElementById('visitGo').addEventListener('click', Visit.list);
+    document.getElementById('appGo').addEventListener('click', App.list);
     document.getElementById('createGo').addEventListener('click', Deskop.create);
     document.getElementById('createApplication').addEventListener('click', App.create);
     var s = document.querySelector('input[type=search]');
@@ -524,3 +525,24 @@ var User;
     }
     User.editMe = editMe;
 })(User || (User = {}));
+var Visit;
+(function (Visit) {
+    function list() {
+        return __awaiter(this, void 0, void 0, function () {
+            var tbody;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        tbody = Deskop.table(['ID', 'Pseudo', 'Email', 'Admin', 'Application']);
+                        return [4, fetch('/visit/list')];
+                    case 1: return [4, (_a.sent()).json()];
+                    case 2:
+                        (_a.sent())
+                            .forEach(function (v) { return tbody.insertAdjacentHTML('beforeend', "<tr>\n\t\t\t\t<td>" + v.id + "</td>\n\t\t\t\t<td>" + v.pseudo + "</td>\n\t\t\t\t<td>" + v.email + "</td>\n\t\t\t\t<td>" + v.author + "</td>\n\t\t\t\t<td>" + v.app + "</td>\n\t\t\t</tr>"); });
+                        return [2];
+                }
+            });
+        });
+    }
+    Visit.list = list;
+})(Visit || (Visit = {}));

@@ -14,10 +14,10 @@ import (
 // One invitation ticket
 type Visit struct {
 	public.UserInfo
-	Creation time.Time
-	Author   string // Author ID
-	App      string // the app ID
-	URL      string // the URL to the application auth
+	Creation time.Time `json:"creation"`
+	Author   string    `json:"author"` // Author ID
+	App      string    `json:"app"`    // the app ID
+	URL      string    `json:"url"`    // the URL to the application auth
 }
 
 // Create a new invitation.

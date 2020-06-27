@@ -62,8 +62,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	User.list();
 	document.getElementById('myconfig').addEventListener('click', User.editMe);
 	document.getElementById('userGo').addEventListener('click', User.list);
-	document.getElementById('appGo').addEventListener('click', App.list);
 	document.getElementById('logGo').addEventListener('click', Log.list);
+	document.getElementById('visitGo').addEventListener('click', Visit.list);
+	document.getElementById('appGo').addEventListener('click', App.list);
 	document.getElementById('createGo').addEventListener('click', Deskop.create);
 	document.getElementById('createApplication').addEventListener('click', App.create);
 	let s: HTMLInputElement = document.querySelector('input[type=search]');
