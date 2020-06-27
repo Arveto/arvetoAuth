@@ -137,6 +137,9 @@ func Create(opt Option) *Server {
 	serv.handleLevel("/user/list", public.LevelCandidate, serv.userList)
 	serv.handleLevel("/user/rm/me", public.LevelCandidate, serv.userRmMe)
 	serv.handleLevel("/user/rm/other", public.LevelAdmin, serv.userRmOther)
+	serv.handleLevel("/visit/add", public.LevelAdmin, serv.visitAdd)
+	serv.handleLevel("/visit/list", public.LevelStd, serv.visitList)
+	serv.handleLevel("/visit/ticket", public.LevelCandidate, serv.visitTicket)
 
 	return serv
 }
