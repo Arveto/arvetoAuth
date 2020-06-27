@@ -370,10 +370,13 @@ var Log;
                         return [4, fetch('/log/list')];
                     case 1: return [4, (_a.sent()).json()];
                     case 2:
-                        l = _a.sent();
-                        l.map(function (i) { return "<tr>\n\t\t\t\t<td>" + i.operation + "</td>\n\t\t\t\t<td>" + i.actor + "</td>\n\t\t\t\t<td>" + new Date(i.date).toLocaleString() + "</td>\n\t\t\t\t<td>" + (i.value || []).map(function (v) { return "'" + v + "'"; }).join('&#8239;; ') + "</td>\n\t\t\t</tr>"; }).forEach(function (i) {
-                            tbody.insertAdjacentHTML('beforeend', i);
-                        });
+                        l = (_a.sent())
+                            .map(function (e) {
+                            e.date = new Date(e.date);
+                            return e;
+                        })
+                            .sort(function (e1, e2) { return e1.date < e2.date; });
+                        l.forEach(function (i) { return tbody.insertAdjacentHTML('beforeend', "<tr>\n\t\t\t<td>" + i.operation + "</td>\n\t\t\t<td>" + i.actor + "</td>\n\t\t\t<td>" + i.date.toLocaleString() + "</td>\n\t\t\t<td>" + (i.value || []).map(function (v) { return "'" + v + "'"; }).join('&#8239;; ') + "</td>\n\t\t</tr>"); });
                         return [2];
                 }
             });
