@@ -1,9 +1,3 @@
-#list {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(70ex, 1fr));
-	grid-gap: 2ex;
-}
-
 /*!
  * Bootswatch v4.5.0
  * Homepage: https://bootswatch.com

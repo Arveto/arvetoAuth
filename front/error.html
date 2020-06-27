@@ -12,14 +12,13 @@
 	<div class="container-fluid p-5">
 		<div class="row my-5">
 			<div class="col-4">
-				<img src="/arveto.jpg" class="rounded img-fluid"
+				<img src="/arveto.webp" class="rounded img-fluid"
 						alt="Logo d'Arveto">
 			</div>
 			<div class="col-8">
 				<h1 class="display-3">
 					{{- if eq .Code 200 }}Success
-					{{else}}Error{{end}}&nbsp;:
-						{{html .Code}}</h1>
+					{{else}}Error{{end}}&nbsp;: {{html .Code}}</h1>
 				<a href="">{{html .URL}}</a>
 				<hr class="border">
 				<p class="text-monospace my-3">{{html .Error}}</p>

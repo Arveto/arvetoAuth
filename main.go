@@ -8,7 +8,7 @@ import (
 	"./pkg"
 	"./pkg/github"
 	"./pkg/google"
-	"github.com/HuguesGuilleus/static.v1"
+	"github.com/HuguesGuilleus/static.v2"
 	"gopkg.in/ini.v1"
 	"log"
 	"net/http"
