@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" href="/style.css">
 	<link rel="icon" href="/favicon.png">
-	<title>Erreur Arveto Authentification</title>
+	<title>{{- if eq .Code 200 }}Success{{else}}Error{{end}}&nbsp;: {{.Code}}</title>
 </head>
 
 <body>
@@ -18,7 +18,7 @@
 			<div class="col-8">
 				<h1 class="display-3">
 					{{- if eq .Code 200 }}Success
-					{{else}}Error{{end}}&nbsp;: {{html .Code}}</h1>
+					{{else}}Error{{end}}&nbsp;: {{.Code}}</h1>
 				<a href="">{{html .URL}}</a>
 				<hr class="border">
 				<p class="text-monospace my-3">{{html .Error}}</p>

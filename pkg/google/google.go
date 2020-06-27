@@ -6,7 +6,6 @@ package google
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -31,8 +30,7 @@ func URL(to string) string {
 		"scope=https%3A//www.googleapis.com/auth/userinfo.profile%20https%3A//www.googleapis.com/auth/userinfo.email" +
 		"&response_type=code" +
 		"&client_id=" + Conf.ClientID +
-		"&redirect_uri=" + Conf.RedirectURL +
-		"&state=" + base64.RawURLEncoding.EncodeToString([]byte(to))
+		"&redirect_uri=" + Conf.RedirectURL
 }
 
 type User struct {

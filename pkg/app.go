@@ -5,7 +5,6 @@
 package auth
 
 import (
-	"./public"
 	"encoding/json"
 	"net/http"
 )
@@ -23,37 +22,6 @@ func (s *Server) defaultApp() {
 		Name: "Example for the dev",
 		URL:  "http://localhost:9000/login",
 	})
-}
-
-// Generate a JWT for a specific app.
-func (s *Server) authUser(w http.ResponseWriter, r *http.Request) {
-	var app application
-	if s.db.GetS("app:"+r.URL.Query().Get("app"), &app) {
-		s.Error(w, r, "Need app params in URL", http.StatusBadRequest)
-		return
-	}
-
-	to := app.URL + "?"
-	if r := r.URL.Query().Get("r"); r != "" {
-		to += "r=" + r + "&"
-	}
-
-	if u := s.getUser(r); u != nil {
-		if u.Level < public.LevelVisitor {
-			s.Error(w, r, "Lowest level", http.StatusForbidden)
-			return
-		}
-		jwt, err := u.ToJWT(s.key, app.ID)
-		if err != nil {
-			s.Error(w, r, "Generate JWT error: "+err.Error(),
-				http.StatusInternalServerError)
-			return
-		}
-		redirection(w, to+"jwt="+jwt)
-	} else {
-		http.Redirect(w, r, "/login/?app="+app.ID+"&r="+r.URL.Query().Get("r"),
-			http.StatusTemporaryRedirect)
-	}
 }
 
 // List the applications.

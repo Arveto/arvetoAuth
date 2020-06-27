@@ -8,22 +8,19 @@ import (
 	"./github"
 	"./google"
 	"./public"
-	"encoding/base64"
-	"fmt"
 	"net/http"
-	"regexp"
 )
 
-var loginApp = regexp.MustCompile(`/login/from/\w+/(\w+)/(.*)`)
+const newUser = "Vous êtes inscris! Mais vous devez être accrédité pour continuer."
 
+// Redirect to an Github authentification service.
 func (s *Server) loginWithGoogle(w http.ResponseWriter, r *http.Request) {
-	if app := r.URL.Query().Get("app"); app != "" {
-		http.Redirect(w, r,
-			google.URL(fmt.Sprintf("/auth?app=%s&r=%s", app, r.URL.Query().Get("r"))),
-			http.StatusTemporaryRedirect)
-	} else {
-		http.Redirect(w, r, google.URL("/"), http.StatusTemporaryRedirect)
-	}
+	http.Redirect(w, r, google.URL("/"), http.StatusTemporaryRedirect)
+}
+
+// Redirect to an Google authentification service.
+func (s *Server) loginWithGithub(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, github.URL(""), http.StatusTemporaryRedirect)
 }
 
 func (s *Server) loginFromGoogle(w http.ResponseWriter, r *http.Request) {
@@ -45,31 +42,21 @@ func (s *Server) loginFromGoogle(w http.ResponseWriter, r *http.Request) {
 
 		if s.nbAdmin > 0 {
 			u.Level = public.LevelCandidate
-			s.Error(w, r, "Vous êtes inscris! mais vous devez être accrédité pour continuer", http.StatusForbidden)
+			s.Error(w, r, newUser, http.StatusForbidden)
 			return
 		}
 		u.Level = public.LevelAdmin
 	} else if u.Level < public.LevelStd {
-		s.Error(w, r, "Vous êtes inscris! mais vous devez être accrédité pour continuer", http.StatusForbidden)
+		s.Error(w, r, newUser, http.StatusForbidden)
 		return
 	}
 
 	s.setCookie(w, r, &u)
-	to, err := base64.RawURLEncoding.DecodeString(r.URL.Query().Get("state"))
-	if err != nil {
-		to = []byte("/")
-	}
-	redirection(w, string(to))
-}
 
-// Redirect to an authentification service.
-func (s *Server) loginWithGithub(w http.ResponseWriter, r *http.Request) {
-	if app := r.URL.Query().Get("app"); app != "" {
-		http.Redirect(w, r,
-			github.URL(s.url+"login/from/github/"+app+"/"+r.URL.Query().Get("r")),
-			http.StatusTemporaryRedirect)
+	if authApp(r) != "" {
+		redirection(w, "/auth")
 	} else {
-		http.Redirect(w, r, github.URL(""), http.StatusTemporaryRedirect)
+		redirection(w, "/")
 	}
 }
 
@@ -94,19 +81,18 @@ func (s *Server) loginFromGithub(w http.ResponseWriter, r *http.Request) {
 
 		if s.nbAdmin > 0 {
 			u.Level = public.LevelCandidate
-			s.Error(w, r, "Vous êtes inscris! mais vous devez être accrédité pour continuer", http.StatusForbidden)
+			s.Error(w, r, newUser, http.StatusForbidden)
 			return
 		}
 		u.Level = public.LevelAdmin
 	} else if u.Level < public.LevelStd {
-		s.Error(w, r, "Vous êtes inscris! mais vous devez être accrédité pour continuer", http.StatusForbidden)
+		s.Error(w, r, newUser, http.StatusForbidden)
 		return
 	}
 
 	s.setCookie(w, r, &u)
-
-	if loginApp.MatchString(r.URL.Path) {
-		redirection(w, loginApp.ReplaceAllString(r.URL.Path, "/auth?app=$1&r=$2"))
+	if authApp(r) != "" {
+		redirection(w, "/auth")
 	} else {
 		redirection(w, "/")
 	}
