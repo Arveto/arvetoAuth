@@ -6,6 +6,7 @@ package auth
 
 import (
 	"./public"
+	"encoding/json"
 	"net/http"
 	"time"
 )
@@ -78,4 +79,12 @@ func (s *Server) visitAdd(w http.ResponseWriter, r *http.Request) {
 func (s *Server) visitTicket(w http.ResponseWriter, r *http.Request) {}
 
 // List the invitation
-func (s *Server) visitList(w http.ResponseWriter, r *http.Request) {}
+func (s *Server) visitList(w http.ResponseWriter, r *http.Request) {
+	list := make([]Visit, 0)
+	s.db.ForS("visit:", 0, 0, nil, func(_ string, v Visit) {
+		list = append(list, v)
+	})
+	j, _ := json.Marshal(list)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(j)
+}
