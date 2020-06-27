@@ -67,6 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById('appGo').addEventListener('click', App.list);
 	document.getElementById('createGo').addEventListener('click', Deskop.create);
 	document.getElementById('createApplication').addEventListener('click', App.create);
+	document.getElementById('createVisit').addEventListener('click', Visit.create);
 	let s: HTMLInputElement = document.querySelector('input[type=search]');
 	s.addEventListener('input', () => search(s.value));
 }, { once: true, });

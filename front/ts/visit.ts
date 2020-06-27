@@ -14,4 +14,31 @@ namespace Visit {
 				<td>${v.app}</td>
 			</tr>`));
 	}
+	// Create a new visit ticket.
+	export async function create() {
+		Deskop.edit(`Création d'un ticket de visite`, list);
+		let app = await Edit.createP('Application ID');
+		let pseudo = await Edit.createP('Pseudo');
+		let email = await Edit.createP('Email');
+
+		Deskop.errorRep(await fetch('/visit/add', {
+			method: 'POST',
+			headers: new Headers({
+				'Content-Type': 'application/x-www-form-urlencoded',
+			}),
+			body: encodeForm({
+				app: app,
+				pseudo: pseudo,
+				email: email,
+			}),
+		}));
+	}
+}
+
+function encodeForm(o): string {
+	let body: string[] = [];
+	for (let key in o) {
+		body.push(`${key}=${encodeURI(o[key])}`)
+	}
+	return body.join("&");
 }

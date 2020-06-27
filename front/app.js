@@ -207,6 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('appGo').addEventListener('click', App.list);
     document.getElementById('createGo').addEventListener('click', Deskop.create);
     document.getElementById('createApplication').addEventListener('click', App.create);
+    document.getElementById('createVisit').addEventListener('click', Visit.create);
     var s = document.querySelector('input[type=search]');
     s.addEventListener('input', function () { return search(s.value); });
 }, { once: true });
@@ -248,6 +249,16 @@ var Edit;
         });
     }
     Edit.create = create;
+    function createP(name) {
+        var p = new Promise(function (resolve) { return create(name, function (s) {
+            document.getElementById('edit')
+                .querySelector('div.input-group.input-group-lg.mb-3')
+                .remove();
+            resolve(s);
+        }); });
+        return p;
+    }
+    Edit.createP = createP;
     function confirm(v, end) {
         var g = $("<div class=\"input-group input-group-lg mb-3\">\n\t\t\t<div class=\"input-group-prepend\">\n\t\t\t\t<span class=\"input-group-text\">Recopier&nbsp;: </span>\n\t\t\t</div>\n\t\t\t<input type=text required class=\"form-control\">\n\t\t\t<div class=\"input-group-append\">\n\t\t\t\t<button type=submit class=\"btn btn-success\" disabled>Confirmer</button>\n\t\t\t</div>\n\t\t</div>");
         document.getElementById('edit').append(g);
@@ -545,4 +556,47 @@ var Visit;
         });
     }
     Visit.list = list;
+    function create() {
+        return __awaiter(this, void 0, void 0, function () {
+            var app, pseudo, email, _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        Deskop.edit("Cr\u00E9ation d'un ticket de visite", list);
+                        return [4, Edit.createP('Application ID')];
+                    case 1:
+                        app = _c.sent();
+                        return [4, Edit.createP('Pseudo')];
+                    case 2:
+                        pseudo = _c.sent();
+                        return [4, Edit.createP('Email')];
+                    case 3:
+                        email = _c.sent();
+                        _b = (_a = Deskop).errorRep;
+                        return [4, fetch('/visit/add', {
+                                method: 'POST',
+                                headers: new Headers({
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                }),
+                                body: encodeForm({
+                                    app: app,
+                                    pseudo: pseudo,
+                                    email: email
+                                })
+                            })];
+                    case 4:
+                        _b.apply(_a, [_c.sent()]);
+                        return [2];
+                }
+            });
+        });
+    }
+    Visit.create = create;
 })(Visit || (Visit = {}));
+function encodeForm(o) {
+    var body = [];
+    for (var key in o) {
+        body.push(key + "=" + encodeURI(o[key]));
+    }
+    return body.join("&");
+}

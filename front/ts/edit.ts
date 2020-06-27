@@ -32,6 +32,17 @@ namespace Edit {
 			call();
 		});
 	}
+	// Return a promise resolved with the string.
+	export function createP(name: string): Promise<string> {
+		let p = new Promise<string>(resolve => create(name, s => {
+			document.getElementById('edit')
+				.querySelector('div.input-group.input-group-lg.mb-3')
+				.remove();
+			resolve(s);
+		}));
+		return p;
+	}
+
 	// Create a text confirm. When done, execute the callBack.
 	export function confirm(v: string, end: () => void) {
 		let g = $(`<div class="input-group input-group-lg mb-3">
