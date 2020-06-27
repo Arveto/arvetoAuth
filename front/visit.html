@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="/style.css">
+	<link rel="icon" href="/favicon.ico">
+	<meta name=description
+			content="Ticket de visite pour {{.Name}}">
+	<title>Ticket de visite</title>
+</head>
+
+<body>
+
+	<div class="container my-5 text-center">
+		<img src="/alberto.webp" alt="Arveto" class="my-3 "
+				style="width:7em;border-radius:40%;padding:1em;background:white;">
+		<h1 class="pt-4">Ticket de visite pour&nbsp;:</h1>
+		<h2 class="pb-4">{{.Name}} &lt;{{.Email}}&gt;</h2>
+	</div>
+
+	<div class="container-sm my-5">
+		{{- if .URL -}}
+		<a class="my-3 btn btn-primary btn-lg btn-block"
+				href="{{.URL}}">Ticket</a>
+		{{- else -}}
+		<a class="my-3 btn btn-warning btn-lg btn-block"
+				href="">Expiré</a>
+		{{- end -}}
+	</div>
+
+</body>
+
+</html>

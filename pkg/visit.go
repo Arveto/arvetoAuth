@@ -75,8 +75,27 @@ func (s *Server) visitAdd(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("ok"))
 }
 
+const day time.Duration = 24 * time.Hour
+
 // Send the invitation ticket
-func (s *Server) visitTicket(w http.ResponseWriter, r *http.Request) {}
+func (s *Server) visitTicket(w http.ResponseWriter, r *http.Request) {
+	var v Visit
+	if s.db.GetS("visit:"+r.URL.Query().Get("v"), &v) {
+		s.Error(w, r, "Visit not found", http.StatusNotFound)
+		return
+	}
+
+	url := v.URL
+	if v.Creation.Add(day).Before(time.Now()) {
+		url = ""
+	}
+
+	s.visitPage.Execute(w, struct{ Name, Email, URL string }{
+		Name:  v.Pseudo,
+		Email: v.Email,
+		URL:   url,
+	})
+}
 
 // List the invitation
 func (s *Server) visitList(w http.ResponseWriter, r *http.Request) {

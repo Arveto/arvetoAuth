@@ -37,6 +37,8 @@ type Server struct {
 	url string
 	// The template to send error response.
 	errorPage *template.Template
+	// The template to server /visit/ticket
+	visitPage *template.Template
 	// Mail options ready to use
 	mailAuth  smtp.Auth
 	mailHost  string
@@ -67,6 +69,7 @@ func Create(opt Option) *Server {
 		mailLogin:     opt.MailLogin,
 		mailHost:      opt.MailHost + ":smtp",
 		errorPage:     static.TemplateHTML(nil, "front/error.html"),
+		visitPage:     static.TemplateHTML(nil, "front/visit.html"),
 		avatarDefault: static.WebP(nil, "front/img/defaultUser.webp"),
 	}
 
