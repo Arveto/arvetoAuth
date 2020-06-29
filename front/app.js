@@ -36,6 +36,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var App;
 (function (App) {
+    App.l = [];
+    function download() {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, fetch('/app/list')];
+                    case 1: return [4, (_a.sent()).json()];
+                    case 2:
+                        App.l = _a.sent();
+                        return [2];
+                }
+            });
+        });
+    }
+    App.download = download;
     function list() {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -47,16 +62,15 @@ var App;
     App.list = list;
     function listSimple() {
         return __awaiter(this, void 0, void 0, function () {
-            var table, l;
+            var table;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         table = Deskop.table(['ID', 'Name', 'URL']);
-                        return [4, fetch('/app/list')];
-                    case 1: return [4, (_a.sent()).json()];
-                    case 2:
-                        l = _a.sent();
-                        l.forEach(function (app) {
+                        return [4, download()];
+                    case 1:
+                        _a.sent();
+                        App.l.forEach(function (app) {
                             var e = $("<tr>\n\t\t\t\t\t<td>" + app.ID + "</td>\n\t\t\t\t\t<td>" + app.Name + "</td>\n\t\t\t\t\t<td>" + app.URL + "</td>\n\t\t\t\t</tr>");
                             table.append(e);
                         });
@@ -250,15 +264,29 @@ var Edit;
     }
     Edit.create = create;
     function createP(name) {
-        var p = new Promise(function (resolve) { return create(name, function (s) {
+        return new Promise(function (resolve) { return create(name, function (s) {
             document.getElementById('edit')
                 .querySelector('div.input-group.input-group-lg.mb-3')
                 .remove();
             resolve(s);
         }); });
-        return p;
     }
     Edit.createP = createP;
+    function optionP(name, values) {
+        var g = $("<div class=\"form-group\">\n\t\t\t<div class=\"input-group-prepend mb-3\">\n\t\t\t\t<span class=\"input-group-text\">" + name + "&nbsp;:</span>\n\t\t\t</div>\n\t\t\t<select class=\"form-group custom-select\"></select>\n\t\t\t<div id=submit class=\"input-group-append\">\n\t\t\t\t<button type=submit class=\"btn btn-success\">Creer</button>\n\t\t\t</div>\n\t\t</div>");
+        document.getElementById('edit').append(g);
+        var select = g.querySelector('select');
+        values.forEach(function (v) {
+            select.innerHTML += "<option value=\"" + v + "\">" + v + "</option>";
+        });
+        return new Promise(function (resolve) {
+            g.querySelector('#submit').addEventListener('click', function () {
+                g.remove();
+                resolve(select.value);
+            });
+        });
+    }
+    Edit.optionP = optionP;
     function confirm(v, end) {
         var g = $("<div class=\"input-group input-group-lg mb-3\">\n\t\t\t<div class=\"input-group-prepend\">\n\t\t\t\t<span class=\"input-group-text\">Recopier&nbsp;: </span>\n\t\t\t</div>\n\t\t\t<input type=text required class=\"form-control\">\n\t\t\t<div class=\"input-group-append\">\n\t\t\t\t<button type=submit class=\"btn btn-success\" disabled>Confirmer</button>\n\t\t\t</div>\n\t\t</div>");
         document.getElementById('edit').append(g);
@@ -580,14 +608,17 @@ var Visit;
                 switch (_c.label) {
                     case 0:
                         Deskop.edit("Cr\u00E9ation d'un ticket de visite", list);
-                        return [4, Edit.createP('Application ID')];
+                        return [4, App.download()];
                     case 1:
+                        _c.sent();
+                        return [4, Edit.optionP('Application ID', App.l.map(function (a) { return a.ID; }))];
+                    case 2:
                         app = _c.sent();
                         return [4, Edit.createP('Pseudo')];
-                    case 2:
+                    case 3:
                         pseudo = _c.sent();
                         return [4, Edit.createP('Email')];
-                    case 3:
+                    case 4:
                         email = _c.sent();
                         _b = (_a = Deskop).errorRep;
                         return [4, fetch('/visit/add', {
@@ -601,7 +632,7 @@ var Visit;
                                     email: email
                                 })
                             })];
-                    case 4:
+                    case 5:
                         _b.apply(_a, [_c.sent()]);
                         return [2];
                 }

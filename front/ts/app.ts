@@ -9,13 +9,20 @@ namespace App {
 		URL: string;
 	}
 
+	// The list of the apps.
+	export var l: Array<App> = [];
+
+	export async function download() {
+		l = await (await fetch('/app/list')).json();
+	}
+
 	// List all the application
 	export async function list() {
 		(User.admin ? listAdmin : listSimple)()
 	}
 	async function listSimple() {
 		let table = Deskop.table(['ID', 'Name', 'URL']);
-		let l: Array<App> = await (await fetch('/app/list')).json();
+		await download();
 		l.forEach(app => {
 			let e = $(`<tr>
 					<td>${app.ID}</td>

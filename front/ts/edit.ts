@@ -34,13 +34,36 @@ namespace Edit {
 	}
 	// Return a promise resolved with the string.
 	export function createP(name: string): Promise<string> {
-		let p = new Promise<string>(resolve => create(name, s => {
+		return new Promise<string>(resolve => create(name, s => {
 			document.getElementById('edit')
 				.querySelector('div.input-group.input-group-lg.mb-3')
 				.remove();
 			resolve(s);
 		}));
-		return p;
+	}
+
+	export function optionP(name: string, values: string[]): Promise<string> {
+		let g = $(`<div class="form-group">
+			<div class="input-group-prepend mb-3">
+				<span class="input-group-text">${name}&nbsp;:</span>
+			</div>
+			<select class="form-group custom-select"></select>
+			<div id=submit class="input-group-append">
+				<button type=submit class="btn btn-success">Creer</button>
+			</div>
+		</div>`);
+		document.getElementById('edit').append(g);
+		let select = g.querySelector('select');
+		values.forEach(v => {
+			select.innerHTML += `<option value="${v}">${v}</option>`;
+		});
+
+		return new Promise<string>(resolve => {
+			g.querySelector('#submit').addEventListener('click', () => {
+				g.remove();
+				resolve(select.value);
+			});
+		});
 	}
 
 	// Create a text confirm. When done, execute the callBack.

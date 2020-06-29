@@ -17,7 +17,8 @@ namespace Visit {
 	// Create a new visit ticket.
 	export async function create() {
 		Deskop.edit(`Création d'un ticket de visite`, list);
-		let app = await Edit.createP('Application ID');
+		await App.download();
+		let app = await Edit.optionP('Application ID', App.l.map(a => a.ID));
 		let pseudo = await Edit.createP('Pseudo');
 		let email = await Edit.createP('Email');
 
