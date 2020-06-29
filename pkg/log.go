@@ -34,7 +34,7 @@ func (s *Server) logAdd(u *User, op string, value ...string) {
 
 // List the element for a specific period.
 func (s *Server) logList(w http.ResponseWriter, r *http.Request) {
-	prefix, err := logGetPrefix(w, r)
+	prefix, err := getDuration(w, r, "log:")
 	if err {
 		return
 	}
@@ -51,7 +51,7 @@ func (s *Server) logList(w http.ResponseWriter, r *http.Request) {
 
 // Send the number of element for a specifica period.
 func (s *Server) logCount(w http.ResponseWriter, r *http.Request) {
-	prefix, err := logGetPrefix(w, r)
+	prefix, err := getDuration(w, r, "log:")
 	if err {
 		return
 	}
@@ -68,8 +68,7 @@ func (s *Server) logCount(w http.ResponseWriter, r *http.Request) {
 }
 
 // Get the prefix for log list or index operation
-func logGetPrefix(w http.ResponseWriter, r *http.Request) (string, bool) {
-	prefix := "log:"
+func getDuration(w http.ResponseWriter, r *http.Request, prefix string) (string, bool) {
 	q := r.URL.Query()
 
 	// Generic function to get a specific params
@@ -101,14 +100,22 @@ func logGetPrefix(w http.ResponseWriter, r *http.Request) (string, bool) {
 	if m := getP("mouth", "m"); m < 0 {
 		return "", true
 	} else if m > 0 {
-		prefix += strconv.FormatInt(m, 10) + "-"
+		prefix += towDigit(strconv.FormatInt(m, 10)) + "-"
 		// Day
 		if d := getP("day", "d"); d < 0 {
 			return "", true
 		} else if d > 0 {
-			prefix += strconv.FormatInt(d, 10) + "-"
+			prefix += towDigit(strconv.FormatInt(d, 10))
 		}
 	}
 
 	return prefix, false
+}
+
+// Transform: "2" --> "02"
+func towDigit(s string) string {
+	if len(s) != 2 {
+		return "0" + s
+	}
+	return s
 }

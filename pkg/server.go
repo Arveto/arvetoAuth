@@ -154,7 +154,7 @@ func Create(opt Option) *Server {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Println("[REQ]", r.URL.Path)
+	log.Println("[REQ]", r.RequestURI)
 	w.Header().Add("Server", "Arveto auth server")
 	s.mux.ServeHTTP(w, r)
 }
