@@ -138,14 +138,14 @@ namespace Edit {
 		let g = $(`<div class="input-group mb-3">
 			<input type=file id=avatarInput hidden accept="image/png,image/jpeg,image/gif,image/webp">
 			<label for=avatarInput>
-				Envoyer une image&nbsp;:<br>
+				Envoyer une image (512×512)&nbsp;:<br>
 				<img class="rounded" src="${User.me.avatar}">
 			</label>
 		</div>`);
 		document.getElementById('edit').append(g);
+		let label = g.querySelector('label');
 		let input = g.querySelector('input');
-		input.addEventListener('input', async () => {
-			let f = input.files[0];
+		async function send(f) {
 			let rep = await fetch('/avatar/edit', {
 				method: 'PATCH',
 				headers: new Headers({
@@ -157,6 +157,24 @@ namespace Edit {
 				document.location.reload();
 			}
 			Deskop.errorRep(rep);
+		}
+		input.addEventListener('input', () => send(input.files[0]));
+		label.addEventListener('drop', event => {
+			send(event.dataTransfer.files[0]);
+		}, false);
+
+		label.addEventListener('dragenter', event => {
+			label.classList.add('border', 'border-primary')
+		}, false);
+		label.addEventListener('dragleave', event => {
+			label.classList.remove('border', 'border-primary')
+		}, false);
+
+		['dragover', 'drop'].forEach(name => {
+			label.addEventListener(name, event => {
+				event.stopPropagation();
+				event.preventDefault();
+			}, false);
 		});
 	}
 }

@@ -336,37 +336,54 @@ var Edit;
     }
     Edit.options = options;
     function avatar() {
-        var _this = this;
-        var g = $("<div class=\"input-group mb-3\">\n\t\t\t<input type=file id=avatarInput hidden accept=\"image/png,image/jpeg,image/gif,image/webp\">\n\t\t\t<label for=avatarInput>\n\t\t\t\tEnvoyer une image&nbsp;:<br>\n\t\t\t\t<img class=\"rounded\" src=\"" + User.me.avatar + "\">\n\t\t\t</label>\n\t\t</div>");
+        var g = $("<div class=\"input-group mb-3\">\n\t\t\t<input type=file id=avatarInput hidden accept=\"image/png,image/jpeg,image/gif,image/webp\">\n\t\t\t<label for=avatarInput>\n\t\t\t\tEnvoyer une image (512\u00D7512)&nbsp;:<br>\n\t\t\t\t<img class=\"rounded\" src=\"" + User.me.avatar + "\">\n\t\t\t</label>\n\t\t</div>");
         document.getElementById('edit').append(g);
+        var label = g.querySelector('label');
         var input = g.querySelector('input');
-        input.addEventListener('input', function () { return __awaiter(_this, void 0, void 0, function () {
-            var f, rep, _a, _b, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        f = input.files[0];
-                        _a = fetch;
-                        _b = ['/avatar/edit'];
-                        _c = {
-                            method: 'PATCH',
-                            headers: new Headers({
-                                'Content-Type': f.type
-                            })
-                        };
-                        return [4, f.arrayBuffer()];
-                    case 1: return [4, _a.apply(void 0, _b.concat([(_c.body = _d.sent(),
-                                _c)]))];
-                    case 2:
-                        rep = _d.sent();
-                        if (rep.status === 200) {
-                            document.location.reload();
-                        }
-                        Deskop.errorRep(rep);
-                        return [2];
-                }
+        function send(f) {
+            return __awaiter(this, void 0, void 0, function () {
+                var rep, _a, _b, _c;
+                return __generator(this, function (_d) {
+                    switch (_d.label) {
+                        case 0:
+                            _a = fetch;
+                            _b = ['/avatar/edit'];
+                            _c = {
+                                method: 'PATCH',
+                                headers: new Headers({
+                                    'Content-Type': f.type
+                                })
+                            };
+                            return [4, f.arrayBuffer()];
+                        case 1: return [4, _a.apply(void 0, _b.concat([(_c.body = _d.sent(),
+                                    _c)]))];
+                        case 2:
+                            rep = _d.sent();
+                            if (rep.status === 200) {
+                                document.location.reload();
+                            }
+                            Deskop.errorRep(rep);
+                            return [2];
+                    }
+                });
             });
-        }); });
+        }
+        input.addEventListener('input', function () { return send(input.files[0]); });
+        label.addEventListener('drop', function (event) {
+            send(event.dataTransfer.files[0]);
+        }, false);
+        label.addEventListener('dragenter', function (event) {
+            label.classList.add('border', 'border-primary');
+        }, false);
+        label.addEventListener('dragleave', function (event) {
+            label.classList.remove('border', 'border-primary');
+        }, false);
+        ['dragover', 'drop'].forEach(function (name) {
+            label.addEventListener(name, function (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }, false);
+        });
     }
     Edit.avatar = avatar;
 })(Edit || (Edit = {}));
