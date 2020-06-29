@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	app, err := public.NewApp("ex", "...pub.pem", "jwt")
+	app, err := public.NewApp("app.example.com", "https://auth.example.com/")
 	if err != nil {
 		fmt.Println("Load public key error:", err)
 		return
@@ -33,7 +33,7 @@ func main() {
 		}
 	})
 
-	http.HandleFunc("/login", app.Login())
+	http.HandleFunc("/login", app.Login("", nil))
 	http.HandleFunc("/logout", app.Logout(""))
 
 	fmt.Println("http.ListenAndServe()")
