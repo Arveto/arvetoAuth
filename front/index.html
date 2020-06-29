@@ -49,6 +49,17 @@
 	</nav>
 
 	<div id=edit class="container pb-5"></div>
+	<div id=dateSelect class="container mb-4 p-3 bg-light" hidden>
+		<input type=date id=dateDate class="mr-3">
+		<input type=checkbox id=dateYear>
+		<label class="mr-3" for=dateYear>Année</label>
+		<input type=checkbox id=dateMount>
+		<label class="mr-3" for=dateMount>Mois</label>
+		<input type=checkbox id=dateDay>
+		<label class="mr-3" for=dateDay>Jour</label>
+		<button type=button id=dateGo
+				class="btn btn-success btn-sm">Recherche</button>
+	</div>
 	<table id=table class="table table-hover container"></table>
 	<div id=create class="container-sm my-5" hidden>
 		<h1 class="my-5">Création</h1>

@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 namespace Deskop {
+	export var lister: () => void;
 	// Clear all grousp and display #list.
 	export function create() {
 		reset();
@@ -30,6 +31,17 @@ namespace Deskop {
 			'</tr></thead><tbody></tbody>');
 		return t.querySelector('tbody');
 	}
+	// Enable selecting date
+	export function activeDate(f: () => void) {
+		document.getElementById('dateSelect').hidden = false;
+		if (lister !== f) {
+			(<HTMLInputElement>document.getElementById('dateYear')).checked = true;
+			(<HTMLInputElement>document.getElementById('dateMount')).checked = true;
+			(<HTMLInputElement>document.getElementById('dateDay')).checked = false;
+			lister = f;
+		}
+	}
+	// Clean the deskop
 	function reset() {
 		const groups = ['edit', 'table'];
 
@@ -42,6 +54,7 @@ namespace Deskop {
 			.forEach(e => e.hidden = true);
 
 		document.getElementById('create').hidden = true;
+		document.getElementById('dateSelect').hidden = true;
 	}
 	// Display an error
 	export function error(m: string) {
@@ -70,6 +83,11 @@ document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById('createVisit').addEventListener('click', Visit.create);
 	let s: HTMLInputElement = document.querySelector('input[type=search]');
 	s.addEventListener('input', () => search(s.value));
+	document.getElementById('dateGo').addEventListener('click', () => {
+		if (Deskop.lister) {
+			Deskop.lister();
+		}
+	});
 }, { once: true, });
 
 // Make a search into #table.
@@ -91,4 +109,36 @@ function $(html: string): Element {
 	let e = table ? div.querySelector('tr') : div.firstElementChild;
 	div.remove();
 	return e;
+}
+
+// Select a date to make a request params
+function selectDate(): string {
+	let r = '?';
+
+	const d = new Date(
+		(<HTMLInputElement>document.getElementById('dateDate')).value
+		|| new Date()
+	);
+
+	function getUncheck(id: string): boolean {
+		return !(<HTMLInputElement>document.getElementById(id))
+			.checked;
+	}
+
+	if (getUncheck('dateYear')) {
+		return r;
+	}
+	r += 'y=' + d.getFullYear();
+
+	if (getUncheck('dateMount')) {
+		return r;
+	}
+	r += '&m=' + (d.getMonth() + 1);
+
+	if (getUncheck('dateDay')) {
+		return r;
+	}
+	r += '&d=' + d.getDate();
+
+	return r;
 }

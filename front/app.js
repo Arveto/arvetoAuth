@@ -174,6 +174,16 @@ var Deskop;
         return t.querySelector('tbody');
     }
     Deskop.table = table;
+    function activeDate(f) {
+        document.getElementById('dateSelect').hidden = false;
+        if (Deskop.lister !== f) {
+            document.getElementById('dateYear').checked = true;
+            document.getElementById('dateMount').checked = true;
+            document.getElementById('dateDay').checked = false;
+            Deskop.lister = f;
+        }
+    }
+    Deskop.activeDate = activeDate;
     function reset() {
         var groups = ['edit', 'table'];
         groups
@@ -183,6 +193,7 @@ var Deskop;
             .map(function (g) { return document.getElementById(g); })
             .forEach(function (e) { return e.hidden = true; });
         document.getElementById('create').hidden = true;
+        document.getElementById('dateSelect').hidden = true;
     }
     function error(m) {
         if (!m) {
@@ -224,6 +235,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('createVisit').addEventListener('click', Visit.create);
     var s = document.querySelector('input[type=search]');
     s.addEventListener('input', function () { return search(s.value); });
+    document.getElementById('dateGo').addEventListener('click', function () {
+        if (Deskop.lister) {
+            Deskop.lister();
+        }
+    });
 }, { once: true });
 function search(pattern) {
     pattern = pattern.toLowerCase();
@@ -241,6 +257,28 @@ function $(html) {
     var e = table ? div.querySelector('tr') : div.firstElementChild;
     div.remove();
     return e;
+}
+function selectDate() {
+    var r = '?';
+    var d = new Date(document.getElementById('dateDate').value
+        || new Date());
+    function getUncheck(id) {
+        return !document.getElementById(id)
+            .checked;
+    }
+    if (getUncheck('dateYear')) {
+        return r;
+    }
+    r += 'y=' + d.getFullYear();
+    if (getUncheck('dateMount')) {
+        return r;
+    }
+    r += '&m=' + (d.getMonth() + 1);
+    if (getUncheck('dateDay')) {
+        return r;
+    }
+    r += '&d=' + d.getDate();
+    return r;
 }
 var Edit;
 (function (Edit) {
@@ -424,7 +462,8 @@ var Log;
                 switch (_a.label) {
                     case 0:
                         tbody = Deskop.table(['Opération', 'Acteur', 'Date', 'Valeurs']);
-                        return [4, fetch('/log/list')];
+                        Deskop.activeDate(list);
+                        return [4, fetch('/log/list' + selectDate())];
                     case 1: return [4, (_a.sent()).json()];
                     case 2:
                         l = (_a.sent())
@@ -590,10 +629,12 @@ var Visit;
                 switch (_a.label) {
                     case 0:
                         tbody = Deskop.table(['ID', 'Pseudo', 'Email', 'Admin', 'Application']);
-                        return [4, fetch('/visit/list')];
+                        Deskop.activeDate(list);
+                        return [4, fetch('/visit/list' + selectDate())];
                     case 1: return [4, (_a.sent()).json()];
                     case 2:
                         (_a.sent())
+                            .sort(function (v1, v2) { return v1.id < v2.id; })
                             .forEach(function (v) { return tbody.insertAdjacentHTML('beforeend', "<tr>\n\t\t\t\t<td>" + v.id + "</td>\n\t\t\t\t<td>" + v.pseudo + "</td>\n\t\t\t\t<td>" + v.email + "</td>\n\t\t\t\t<td>" + v.author + "</td>\n\t\t\t\t<td>" + v.app + "</td>\n\t\t\t</tr>"); });
                         return [2];
                 }

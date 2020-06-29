@@ -15,7 +15,8 @@ namespace Log {
 	// Display log in #table.
 	export async function list() {
 		let tbody = Deskop.table(['Opération', 'Acteur', 'Date', 'Valeurs']);
-		let l: Event[] = (await (await fetch('/log/list')).json())
+		Deskop.activeDate(list);
+		let l: Event[] = (await (await fetch('/log/list' + selectDate())).json())
 			.map(e => {
 				e.date = new Date(e.date);
 				return e;

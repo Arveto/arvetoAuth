@@ -5,7 +5,9 @@
 namespace Visit {
 	export async function list() {
 		let tbody = Deskop.table(['ID', 'Pseudo', 'Email', 'Admin', 'Application']);
-		(await (await fetch('/visit/list')).json())
+		Deskop.activeDate(list);
+		(await (await fetch('/visit/list' + selectDate())).json())
+			.sort((v1, v2) => v1.id < v2.id)
 			.forEach(v => tbody.insertAdjacentHTML('beforeend', `<tr>
 				<td>${v.id}</td>
 				<td>${v.pseudo}</td>
