@@ -6,7 +6,10 @@ package auth
 
 import (
 	"./public"
+	"bytes"
 	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"github.com/HuguesGuilleus/go-db.v1"
 	"github.com/HuguesGuilleus/go-parsersa"
 	"github.com/HuguesGuilleus/static.v2"
@@ -124,6 +127,7 @@ func Create(opt Option) *Server {
 	serv.handleLevel("/avatar/get", public.LevelCandidate, serv.avatarGet)
 	serv.handleLevel("/avatar/invite", public.LevelCandidate,
 		static.WebP(nil, "front/img/invite.webp"))
+	serv.handleLevel("/publickey", public.LevelCandidate, static.File(serv.pubkey(), "", "text/plain", nil))
 	serv.handleLevel("/log/count", public.LevelStd, serv.logCount)
 	serv.handleLevel("/log/list", public.LevelStd, serv.logList)
 	serv.handleLevel("/login/", public.LevelCandidate, static.Html(nil, "front/login.html"))
@@ -157,4 +161,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func redirection(w http.ResponseWriter, to string) {
 	w.Header().Add("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte(`<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><a href="` + to + `">Redirect</a><script>document.location.replace('` + to + `');</script></body></html>`))
+}
+
+// Return the publix key used to sign JWT.
+func (s *Server) pubkey() []byte {
+	block := pem.Block{
+		Type:  "BEGIN PUBLIC KEY",
+		Bytes: x509.MarshalPKCS1PublicKey(&s.key.PublicKey),
+	}
+	buff := bytes.Buffer{}
+	pem.Encode(&buff, &block)
+	return buff.Bytes()
 }

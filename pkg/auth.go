@@ -83,7 +83,7 @@ func authLogin(w http.ResponseWriter, app, r string) {
 	redirection(w, "/login/")
 }
 
-// Supprime les cookie
+// Remove the cookies
 func authRmAuth(w http.ResponseWriter) {
 	w.Header().Add("Set-Cookie", (&http.Cookie{
 		Name:     "app",
