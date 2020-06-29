@@ -33,7 +33,7 @@ func main() {
 		}
 	})
 
-	http.HandleFunc("/login", app.Login("", nil))
+	http.HandleFunc("/login", app.Login())
 	http.HandleFunc("/logout", app.Logout(""))
 
 	fmt.Println("http.ListenAndServe()")
