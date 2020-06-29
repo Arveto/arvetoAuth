@@ -8,6 +8,7 @@ import (
 	"./pkg"
 	"./pkg/github"
 	"./pkg/google"
+	"github.com/HuguesGuilleus/go-logoutput"
 	"github.com/HuguesGuilleus/static.v2"
 	"gopkg.in/ini.v1"
 	"log"
@@ -24,6 +25,9 @@ func main() {
 	}
 
 	url := config.Section("").Key("url").String()
+	if l := config.Section("").Key("log").String(); l != "" {
+		logoutput.SetLog(l)
+	}
 
 	// Load github access
 	github.Conf.ClientID = config.Section("github").Key("client").String()
