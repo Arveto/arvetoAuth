@@ -33,7 +33,8 @@ func main() {
 	google.Conf.RedirectURL = url + "login/from/google/"
 
 	// Launch the server.
-	log.Fatal(http.ListenAndServe(":8000", auth.Create(auth.Option{
+	listen := config.Section("").Key("listen").MustString(":8000")
+	log.Fatal(http.ListenAndServe(listen, auth.Create(auth.Option{
 		Key:          "data/key.pem",
 		URL:          url,
 		MailHost:     config.Section("mail").Key("host").String(),
