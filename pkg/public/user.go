@@ -12,6 +12,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -24,6 +25,9 @@ type UserInfo struct {
 	Avatar string    `json:"avatar"`
 	Level  UserLevel `json:"level"`
 }
+
+// Manage requet from login by a provider
+type Provider func(r *http.Request) (*UserInfo, error)
 
 // UserInfo with some information to a specific service.
 type jwtBody struct {

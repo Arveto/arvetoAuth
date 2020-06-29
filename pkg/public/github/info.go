@@ -5,6 +5,7 @@
 package github
 
 import (
+	".."
 	"context"
 	"encoding/json"
 	"golang.org/x/oauth2"
@@ -38,14 +39,28 @@ func URL(redirect string) string {
 }
 
 type Info struct {
-	Pseudo   string `json:"name"`
-	Login    string `json:"login"`
-	Email    string `json:"email"`
-	Icon     string `json:"avatar_url"`
-	GithubId int    `json:"id"`
+	Pseudo string `json:"name"`
+	Login  string `json:"login"`
+	Email  string `json:"email"`
+	Avatar string `json:"avatar_url"`
 }
 
-func NewInfo(r *http.Request) (*Info, error) {
+// Return an user login with GitHub
+func User(r *http.Request) (*public.UserInfo, error) {
+	i, err := downloadInfo(r)
+	if err != nil {
+		return nil, err
+	}
+
+	return &public.UserInfo{
+		ID:     "github:" + i.Login,
+		Pseudo: i.Pseudo,
+		Email:  i.Email,
+		Avatar: i.Avatar,
+	}, nil
+}
+
+func downloadInfo(r *http.Request) (*Info, error) {
 	t, err := Conf.Exchange(ctx, r.URL.Query().Get("code"))
 	if err != nil {
 		return nil, err

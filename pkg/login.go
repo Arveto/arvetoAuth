@@ -5,9 +5,9 @@
 package auth
 
 import (
-	"./github"
 	"./google"
 	"./public"
+	"./public/github"
 	"net/http"
 )
 
@@ -62,22 +62,24 @@ func (s *Server) loginFromGoogle(w http.ResponseWriter, r *http.Request) {
 
 // Manage user from GitHub authentification service.
 func (s *Server) loginFromGithub(w http.ResponseWriter, r *http.Request) {
-	info, err := github.NewInfo(r)
+	s.loginFrom(w, r, github.User)
+}
+
+// Manage user login from a provider.
+func (s *Server) loginFrom(w http.ResponseWriter, r *http.Request, p public.Provider) {
+	info, err := p(r)
 	if err != nil {
 		s.Error(w, r, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	id := "github:" + info.Login
 	var u User
-	if s.db.GetS("user:"+id, &u) {
-		defer s.db.SetS("user:"+id, &u)
-		u.ID = id
-		u.Pseudo = info.Pseudo
-		u.Email = info.Email
+	if s.db.GetS("user:"+info.ID, &u) {
+		defer s.db.SetS("user:"+info.ID, &u)
+		u.UserInfo = *info
 
+		go s.avatarFromURL(&u, info.Avatar)
 		u.Avatar = s.url + "avatar/get?u=" + u.ID
-		go s.avatarFromURL(&u, info.Icon)
 
 		if s.nbAdmin > 0 {
 			u.Level = public.LevelCandidate
