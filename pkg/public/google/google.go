@@ -5,11 +5,13 @@
 package google
 
 import (
+	".."
 	"context"
 	"encoding/json"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"io/ioutil"
+	"net/http"
 )
 
 var (
@@ -33,14 +35,29 @@ func URL(to string) string {
 		"&redirect_uri=" + Conf.RedirectURL
 }
 
-type User struct {
+func User(r *http.Request) (*public.UserInfo, error) {
+	u, err := getUser(r.URL.Query().Get("code"))
+	if err != nil {
+		return nil, err
+	}
+
+	return &public.UserInfo{
+		ID:     "google:" + u.ID,
+		Pseudo: u.Name,
+		Email:  u.Email,
+		Avatar: u.Picture,
+	}, nil
+}
+
+type user struct {
 	ID      string `json:"id"`
 	Email   string `json:"email"`
 	Name    string `json:"name"`
 	Picture string `json:"picture"`
 }
 
-func GetInfo(code string) (*User, error) {
+// Download information from Google api
+func getUser(code string) (*user, error) {
 	t, err := Conf.Exchange(ctx, code)
 	if err != nil {
 		return nil, err
@@ -56,7 +73,7 @@ func GetInfo(code string) (*User, error) {
 		return nil, err
 	}
 
-	var u User
+	var u user
 	err = json.Unmarshal(all, &u)
 	return &u, err
 }

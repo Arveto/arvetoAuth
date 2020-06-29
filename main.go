@@ -6,8 +6,8 @@ package main
 
 import (
 	"./pkg"
-	"./pkg/google"
 	"./pkg/public/github"
+	"./pkg/public/google"
 	"github.com/HuguesGuilleus/go-logoutput"
 	"gopkg.in/ini.v1"
 	"log"

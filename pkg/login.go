@@ -5,9 +5,9 @@
 package auth
 
 import (
-	"./google"
 	"./public"
 	"./public/github"
+	"./public/google"
 	"net/http"
 )
 
@@ -24,40 +24,7 @@ func (s *Server) loginWithGithub(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) loginFromGoogle(w http.ResponseWriter, r *http.Request) {
-	g, err := google.GetInfo(r.URL.Query().Get("code"))
-	if err != nil {
-		s.Error(w, r, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	g.ID = "google:" + g.ID
-	var u User
-	if s.db.GetS("user:"+g.ID, &u) {
-		defer s.db.SetS("user:"+g.ID, &u)
-		u.ID = g.ID
-		u.Pseudo = g.Name
-		u.Email = g.Email
-
-		u.Avatar = s.url + "avatar/get?u=" + u.ID
-		go s.avatarFromURL(&u, g.Picture)
-
-		if s.nbAdmin > 0 {
-			u.Level = public.LevelCandidate
-			s.Error(w, r, newUser, http.StatusForbidden)
-			return
-		}
-		u.Level = public.LevelAdmin
-	} else if u.Level < public.LevelStd {
-		s.Error(w, r, newUser, http.StatusForbidden)
-		return
-	}
-
-	s.setCookie(w, r, &u)
-
-	if authApp(r) != "" {
-		redirection(w, "/auth")
-	} else {
-		redirection(w, "/")
-	}
+	s.loginFrom(w, r, google.User)
 }
 
 // Manage user from GitHub authentification service.
