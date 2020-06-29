@@ -23,6 +23,7 @@ import (
 
 // The option to create a server
 type Option struct {
+	Dev bool   // enable dev mode
 	URL string // The URL of the server
 	DB  string // path to the DB
 	Key string // private key file
@@ -69,16 +70,22 @@ func Create(opt Option) *Server {
 			opt.MailLogin,
 			opt.MailPassword,
 			opt.MailHost),
-		mailLogin:     opt.MailLogin,
-		mailHost:      opt.MailHost + ":smtp",
-		errorPage:     static.TemplateHTML(nil, "front/error.html"),
-		visitPage:     static.TemplateHTML(nil, "front/visit.html"),
-		avatarDefault: static.WebP(nil, "front/img/defaultUser.webp"),
+		mailLogin: opt.MailLogin,
+		mailHost:  opt.MailHost + ":smtp",
 	}
 
-	// Remove this lines for production
-	serv.loadDefaultUsers()
-	serv.defaultApp()
+	if opt.Dev {
+		log.Println("[DEV MODE ENABLE]")
+		static.Dev = true
+		serv.loadDefaultUsers()
+		serv.defaultApp()
+		serv.mux.HandleFunc("/!users", serv.GodUsers)
+		serv.mux.HandleFunc("/!login", serv.GodLogin)
+	}
+
+	serv.errorPage = static.TemplateHTML(nil, "front/error.html")
+	serv.visitPage = static.TemplateHTML(nil, "front/visit.html")
+	serv.avatarDefault = static.WebP(nil, "front/img/defaultUser.webp")
 
 	go func() {
 		serv.db.ForS("user:", 0, 0, nil, func(_ string, u *User) {
@@ -111,11 +118,6 @@ func Create(opt Option) *Server {
 		}
 		index.ServeHTTP(w, r)
 	})
-
-	// Handlers
-
-	serv.mux.HandleFunc("/!users", serv.GodUsers)
-	serv.mux.HandleFunc("/!login", serv.GodLogin)
 
 	serv.handleLevel("/app/add", public.LevelAdmin, serv.appAdd)
 	serv.handleLevel("/app/edit/name", public.LevelAdmin, serv.appEditName)

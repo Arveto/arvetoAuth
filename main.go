@@ -9,15 +9,13 @@ import (
 	"./pkg/github"
 	"./pkg/google"
 	"github.com/HuguesGuilleus/go-logoutput"
-	"github.com/HuguesGuilleus/static.v2"
 	"gopkg.in/ini.v1"
 	"log"
 	"net/http"
 )
 
 func main() {
-	static.Dev = true
-	log.Println("main()")
+	log.Println("[START]")
 
 	config, err := ini.Load("data/config.ini")
 	if err != nil {
@@ -39,6 +37,7 @@ func main() {
 	// Launch the server.
 	listen := config.Section("").Key("listen").MustString(":8000")
 	log.Fatal(http.ListenAndServe(listen, auth.Create(auth.Option{
+		Dev:          config.Section("").Key("dev").MustBool(),
 		Key:          "data/key.pem",
 		URL:          url,
 		MailHost:     config.Section("mail").Key("host").String(),
