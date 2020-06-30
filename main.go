@@ -12,7 +12,24 @@ import (
 	"gopkg.in/ini.v1"
 	"log"
 	"net/http"
+	"os"
 )
+
+func init() {
+	for _, a := range os.Args[1:] {
+		if a == "-h" || a == "--help" {
+			log.Println("(optionnal) Give the working directory")
+			os.Exit(0)
+		}
+	}
+
+	if len(os.Args) == 2 {
+		err := os.Chdir(os.Args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
 
 func main() {
 	log.Println("[START]")
