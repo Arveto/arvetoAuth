@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+const cookieLife time.Duration = time.Hour * 24
+
 // All the informations about an user
 type User struct {
 	public.UserInfo
@@ -233,21 +235,18 @@ func (s *Server) getUser(r *http.Request) *User {
 	}
 
 	// Remove old Cookie
-	save := false
 	for k, t := range u.Cookie {
 		if t.Before(time.Now()) {
 			delete(u.Cookie, k)
-			save = true
 		}
 	}
-	if save {
-		s.db.SetS("user:"+idCookie.Value, &u)
-	}
+	defer s.db.SetS("user:"+idCookie.Value, &u)
 
-	// The if the actual cookie is set.
+	// Test if the actual cookie is set.
 	if u.Cookie[creditCookie.Value].IsZero() {
 		return nil
 	}
+	u.Cookie[creditCookie.Value] = time.Now().Add(cookieLife)
 
 	return &u
 }
@@ -260,7 +259,7 @@ func (s *Server) setCookie(w http.ResponseWriter, r *http.Request, u *User) {
 	if u.Cookie == nil {
 		u.Cookie = make(map[string]time.Time, 1)
 	}
-	u.Cookie[c] = time.Now().Add(time.Hour * time.Duration(6))
+	u.Cookie[c] = time.Now().Add(cookieLife)
 	s.db.SetS("user:"+u.ID, u)
 
 	w.Header().Add("Set-Cookie", (&http.Cookie{
