@@ -92,21 +92,32 @@ type Handler interface {
 // or with a lower level.
 func (a *App) Handle(pattern string, level UserLevel, handler Handler) {
 	a.Mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
-		u := a.User(r)
-		if level > LevelCandidate {
-			if u == nil {
-				a.Error(w, r, "You are not logged", http.StatusUnauthorized)
-				return
-			} else if u.Level < level {
-				a.Error(w, r, "Your level is too low; you need the level: "+level.String(), http.StatusForbidden)
-				return
-			}
-		}
-		handler.ServeHTTP(w, &Request{
-			Request: *r,
-			User:    u,
-		})
+		a.Call(w, r, level, handler)
 	})
+}
+
+// Call handler if the user who make the request has a enought level. If the
+// level is less than LevelCandidate, the user can be nil.
+func (a *App) Call(w http.ResponseWriter, r *http.Request, level UserLevel, handler Handler) {
+	u := a.User(r)
+	if level > LevelCandidate {
+		if u == nil {
+			a.Error(w, r, "You are not logged", http.StatusUnauthorized)
+			return
+		} else if u.Level < level {
+			a.Error(w, r, "Your level is too low; you need the level: "+level.String(), http.StatusForbidden)
+			return
+		}
+	}
+	handler.ServeHTTP(w, &Request{
+		Request: *r,
+		User:    u,
+	})
+}
+
+// Like App.Call but for a func(w http.ResponseWriter, r *Request)
+func (a *App) CallFunc(w http.ResponseWriter, r *http.Request, level UserLevel, f func(w http.ResponseWriter, r *Request)) {
+	a.Call(w, r, level, HandleFunc(f))
 }
 
 // HandleFunc with Request inplace of http.Request
