@@ -13,7 +13,7 @@ import (
 	"github.com/HuguesGuilleus/go-db.v1"
 	"github.com/HuguesGuilleus/go-parsersa"
 	"github.com/HuguesGuilleus/static.v2"
-	"github.com/prologic/bitcask"
+	"git.mills.io/prologic/bitcask"
 	"html/template"
 	"log"
 	"net/http"
